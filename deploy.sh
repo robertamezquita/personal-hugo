@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## For notes on script and setting up the repo, see:
+## https://gohugo.io/tutorials/github-pages-blog/
+
 echo -e "\033[0;32mDeploying updates to GitHub...\033[0m"
 
 # Build the project.
