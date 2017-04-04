@@ -2,29 +2,29 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>R.Amezquita</title>
-    <link>/index.xml</link>
+    <link>http://robertamezquita.github.io/index.xml</link>
     <description>Recent content on R.Amezquita</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 04 Apr 2017 14:15:32 -0400</lastBuildDate>
-    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://robertamezquita.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>A New Hugo Themed Blog</title>
-      <link>/blog/a-new-hugo-theme-blog/</link>
+      <link>http://robertamezquita.github.io/blog/a-new-hugo-theme-blog/</link>
       <pubDate>Tue, 04 Apr 2017 14:15:32 -0400</pubDate>
       
-      <guid>/blog/a-new-hugo-theme-blog/</guid>
+      <guid>http://robertamezquita.github.io/blog/a-new-hugo-theme-blog/</guid>
       <description>&lt;p&gt;I decided to try retheming my site to be a bit more image focused, and to have a more modern look and feel to it. Just a fun way to spend a couple hours while my computer finishes unborking itself. Featured is a photo of the dogs in their &amp;lsquo;jetpacks&amp;rsquo; (car harnesses) waiting for Jen to come back from her shopping trip.&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>About Me</title>
-      <link>/about/</link>
+      <link>http://robertamezquita.github.io/about/</link>
       <pubDate>Mon, 03 Apr 2017 00:00:00 +0000</pubDate>
       
-      <guid>/about/</guid>
+      <guid>http://robertamezquita.github.io/about/</guid>
       <description>&lt;p&gt;The primary goal of vaccination is for our immune system to form a defense against infectious diseases. My work is focused on studying how our body resolves a given infection, and ultimately, how it forms the basis of immunological memory that provides us protection from future challenges. Developing computational approaches that integrates sequencing data from expression and genomic profiling, my aim is to better understand the transcriptional and epigenetic networks that underlie the differentiation of CD8+ T cells in response to infectious disease and vaccinations. Machine learning &amp;amp; data mining, pipeline development, interactive visualization apps, and extensive R programming are just some of the tools in my arsenal.&lt;/p&gt;
 
 &lt;p&gt;While science is a big part of my life, I also love to talk about my wide range of hobbies, and if you oblige me, will show off pictures of my two adorable American Eskimo/Pomeranian pups. If I&amp;rsquo;m not working, I&amp;rsquo;m probably cooking or traveling with my lovely wife, Jen, and our two pups, Chester and Maddie.&lt;/p&gt;
