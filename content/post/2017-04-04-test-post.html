@@ -1,0 +1,42 @@
+---
+title: Test Post
+author: Robert A. Amezquita
+date: '2017-04-04'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+
+<p>Trying out a new post just to see how this system works. Already found that (featured) images don’t seem to be working on the home page, but do work on the /blog/ subdomain. Also I need to make sure to set the “type: ‘post’” in the YAML header. Anyways, let’s see how beautifully R code renders..</p>
+<pre class="r"><code>## run in a chunk with `include = FALSE`
+## library(tidyverse) 
+
+## Run within this chunk with echo = TRUE
+hello_world &lt;- frame_data(
+    ~first, ~second, ~third, ~fourth,
+    &quot;its&quot;, &quot;a&quot;, &quot;beautiful&quot;, &quot;day&quot;
+)
+
+hello_world</code></pre>
+<pre><code>## # A tibble: 1 × 4
+##   first second     third fourth
+##   &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;
+## 1   its      a beautiful    day</code></pre>
+<p>Now what happens when I generate a plot?</p>
+<pre class="r"><code>frame_data(
+    ~one, ~two,
+    1, 2,
+    1, 2
+) %&gt;%
+    ggplot(aes(x = one, y = two)) +
+    geom_point() +
+    theme_classic()</code></pre>
+<p><img src="/post/2017-04-04-test-post_files/figure-html/test2-1.png" width="192" /></p>
+<p>Looking beautiful!! And yes, I am a <code>theme_classic()</code> kind of person myself, though I also enjoy using the <code>cowplot</code> package for really nice plot setting.</p>
