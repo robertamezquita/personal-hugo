@@ -1,5 +1,9 @@
 #!/bin/bash
 
+## If deploy stops working for whatever reason, remove public and run:
+## git rm --cached public
+## git submodule add -b master git@github.com:robertamezquita/robertamezquita.github.io.git public
+
 ## For notes on script and setting up the repo, see:
 ## https://gohugo.io/tutorials/github-pages-blog/
 
