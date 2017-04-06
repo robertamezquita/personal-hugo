@@ -1,0 +1,86 @@
+---
+title: Munging Contiguous Data to Wide Format
+author: Robert A. Amezquita
+date: '2017-04-06'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+<!-- BLOGDOWN-HEAD -->
+<!-- /BLOGDOWN-HEAD -->
+
+<!-- BLOGDOWN-BODY-BEFORE -->
+<!-- /BLOGDOWN-BODY-BEFORE -->
+<p>Here I just wanted to take a quick second to share a small code snippet that illustrates munging a contiguous dataset to a wide format.</p>
+<p>What do I mean by that? Consider the following example: let’s say we have a dataset where we have patients A, B, and C, and we take two tissues from each patient - one of Serum and one of TIF (tumor interstitial fluid), and from each tissue assay a whole host of metabolites, each with its own column. If we want to take the log2 fold-change of Serum vs. TIF for each patient, its tricky to do in Excel when the data is spread out contiguously, across rows.</p>
+<p>So how can we tackle this sort of problem in R? Making use of the <code>tidyverse</code>, the key here is to first gather the metabolites, such that we have a new column named <code>metabolite</code> describing what is being assayed, and a <code>value</code> column with the readout.</p>
+<p>Now, after this we still have our tissue (specimen type) being Serum vs. TIF. If we want to easily compare the two, it’s easier to <code>spread</code> these values out across columns, such that we have one row per patient, with two columns, <code>Serum</code> and <code>TIF</code>, deriving their values from our freshly created <code>value</code> column, with <code>metabolite</code> still describing each assay.</p>
+<p>In code, this is what the process looks like below.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre class="r"><code>## Create example data
+dat &lt;- tribble(
+    ~Patient.ID, ~Tissue, ~Glucose, ~Pyruvate, ~Glutamate,
+    &#39;CR1&#39;,       &#39;Serum&#39;,        1,         2,          3,
+    &#39;CR1&#39;,         &#39;TIF&#39;,        4,         3,         10,
+    &#39;CR2&#39;,       &#39;Serum&#39;,       11,         2,          5,
+    &#39;CR2&#39;,         &#39;TIF&#39;,        5,         10,         4
+)
+dat</code></pre>
+<pre><code>## # A tibble: 4 × 5
+##   Patient.ID Tissue Glucose Pyruvate Glutamate
+##        &lt;chr&gt;  &lt;chr&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1        CR1  Serum       1        2         3
+## 2        CR1    TIF       4        3        10
+## 3        CR2  Serum      11        2         5
+## 4        CR2    TIF       5       10         4</code></pre>
+<pre class="r"><code>## Tidy-ify data for easy calculations
+## Key steps here:
+## - gather: this will take all the different readouts
+##     and put them together under a new column specifying
+##     the metabolite, and a separate column with the value
+## - spread: this takes your data and instead of having
+##     a separate row for each Serum and TIF reading, we
+##     create two new columns each for Serum and TIF, and
+##     spread our `value` column out. less tidy, but better
+##     for log2foldchange calculations
+tidy_dat &lt;- dat %&gt;%
+    tidyr::gather(metabolite, value,
+                  -Patient.ID, -Tissue) %&gt;%
+    spread(Tissue, value)
+tidy_dat</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   Patient.ID metabolite Serum   TIF
+## *      &lt;chr&gt;      &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1        CR1    Glucose     1     4
+## 2        CR1  Glutamate     3    10
+## 3        CR1   Pyruvate     2     3
+## 4        CR2    Glucose    11     5
+## 5        CR2  Glutamate     5     4
+## 6        CR2   Pyruvate     2    10</code></pre>
+<pre class="r"><code>## Calculate fold-change across tissues per patient
+## All we do here is a `mutate()` step, which
+## creates a new column based on some input, in this case
+## log2 foldchange of the column Serum over TIF
+pc &lt;- 0.01  # pseudocount for lfc calc
+
+calc_dat &lt;- tidy_dat %&gt;%
+    dplyr::mutate(
+               lfc_Serum_TIF = log2((Serum + pc) / (TIF + pc))
+           )
+calc_dat</code></pre>
+<pre><code>## # A tibble: 6 × 5
+##   Patient.ID metabolite Serum   TIF lfc_Serum_TIF
+##        &lt;chr&gt;      &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
+## 1        CR1    Glucose     1     4        -1.989
+## 2        CR1  Glutamate     3    10        -1.734
+## 3        CR1   Pyruvate     2     3        -0.583
+## 4        CR2    Glucose    11     5         1.136
+## 5        CR2  Glutamate     5     4         0.321
+## 6        CR2   Pyruvate     2    10        -2.316</code></pre>
