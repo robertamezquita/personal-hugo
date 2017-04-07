@@ -1,0 +1,803 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>My `emacs` Setup</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.19" />
+        
+
+
+        
+            <meta name="author" content="Robert A. Amezquita">
+        
+        
+            
+                <meta name="description" content="Personal website of Robert A. Amezquita">
+            
+        
+
+        
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="My `emacs` Setup"/>
+<meta name="twitter:title" content="My `emacs` Setup"/>
+<meta name="twitter:description" content="As I&rsquo;ve gone further and further down the rabbit hole of computational biology, one thing that has remained with me is my emacs habit. When I first started graduate school and joined the Kleinstein lab, I was learning R and programming as most do in RStudio. However, my life changed when soon after, Stefan, my best mate, convinced me to give emacs a whirl for R programming.
+Since then, I&rsquo;ve come to appreciate all the more my decision to program the emacs way."/>
+<meta name="twitter:site" content="@raarjr"/>
+
+        <meta property="og:title" content="My `emacs` Setup" />
+<meta property="og:description" content="As I&rsquo;ve gone further and further down the rabbit hole of computational biology, one thing that has remained with me is my emacs habit. When I first started graduate school and joined the Kleinstein lab, I was learning R and programming as most do in RStudio. However, my life changed when soon after, Stefan, my best mate, convinced me to give emacs a whirl for R programming.
+Since then, I&rsquo;ve come to appreciate all the more my decision to program the emacs way." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/" />
+
+
+
+<meta property="article:published_time" content="2017-04-07T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2017-04-07T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+
+        
+<meta itemprop="name" content="My `emacs` Setup">
+<meta itemprop="description" content="As I&rsquo;ve gone further and further down the rabbit hole of computational biology, one thing that has remained with me is my emacs habit. When I first started graduate school and joined the Kleinstein lab, I was learning R and programming as most do in RStudio. However, my life changed when soon after, Stefan, my best mate, convinced me to give emacs a whirl for R programming.
+Since then, I&rsquo;ve come to appreciate all the more my decision to program the emacs way.">
+
+
+<meta itemprop="dateModified" content="2017-04-07T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="651">
+
+
+
+<meta itemprop="keywords" content="" />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="/css/google-font.css" />
+            <link rel="stylesheet" href="/css/font-awesome.min.css" />
+            <link rel="stylesheet" href="/css/main.css" />
+            <link rel="stylesheet" href="/css/add-on.css" />
+            <link rel="stylesheet" href="/css/monokai-sublime.css">
+        
+
+        
+
+        
+        
+        
+            
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="/">Robert A. Amezquita</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="/blog">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Blog
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/categories">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/about">
+                        About
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:http://robertamezquita.github.io/">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:http://robertamezquita.github.io/">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="/blog">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Blog
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/categories">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/about">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/"><p>My `emacs` Setup</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://robertamezquita.github.io/post/2017-04-06-munging-contiguous-data-to-wide-format/"><p>Munging Contiguous Data to Wide Format</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&text=My%20%60emacs%60%20Setup&via=raarjr" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&title=My%20%60emacs%60%20Setup" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&title=My%20%60emacs%60%20Setup" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&title=My%20%60emacs%60%20Setup" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Robert%20A.%20Amezquita&body=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/">My `emacs` Setup</a></h1>
+            
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2017-04-07'>
+            April 7, 2017</time>
+        <span class="author">Robert A. Amezquita</span>
+        
+            <p>4 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&text=My%20%60emacs%60%20Setup&via=raarjr" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&title=My%20%60emacs%60%20Setup" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&title=My%20%60emacs%60%20Setup" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f&title=My%20%60emacs%60%20Setup" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Robert%20A.%20Amezquita&body=http%3a%2f%2frobertamezquita.github.io%2fpost%2f2017-04-07-my-emacs-setup%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+
+    <div id="content">
+        <p>As I&rsquo;ve gone further and further down the rabbit hole of computational biology, one thing that has remained with me is my emacs habit. When I first started graduate school and joined the Kleinstein lab, I was learning R and programming as most do in RStudio. However, my life changed when soon after, Stefan, my best mate, convinced me to give emacs a whirl for R programming.</p>
+
+<p>Since then, I&rsquo;ve come to appreciate all the more my decision to program the emacs way. The reasons I&rsquo;ve stuck with it are numerous, but the most important are:</p>
+
+<ul>
+<li><em>Flexibility</em> - emacs has its own shell environment that allows me to simultaneously program in R interactively (via ESS), and switch between the two with ease. This is great for bioinformatics where all too often you need both commandline tools for processing to work in concert with custom analysis scripts</li>
+<li><em>Fast</em> - the fastest way to get around a coding document is via emacs&rsquo; advanced motion controls; while some IDEs like RStudio allow for emacs keybindings, all too often its incomplete or neutered. Plus, I find running/sending code in emacs to ESS is much faster to do (muscle memory helps too)</li>
+<li><em>Customizable</em> - you can make emacs truly yours in a way no other IDE allows. While I don&rsquo;t go too crazy with this, some customizations are indispensible</li>
+</ul>
+
+<p>On this last point, I wanted to post my current <code>.emacs</code> file to show off some of my customizations (a lot of which is thanks to Stefan). The full <code>.emacs</code> is posted below, and I&rsquo;ll highlight some of my favorites:</p>
+
+<ul>
+<li><em>Package repo MELPA</em> - indispensible for extra useful package</li>
+<li><em>Auto-complete in ESS</em> - makes the terminal feel more like a traditional, GUI IDE</li>
+<li><em>Poly-mode</em> - essential for literate programming, here for Rmarkdown <code>.Rmd</code> files</li>
+<li><em>Disable smart underscore/insert underscore with _</em> - I hate the default smart underscore because I use a lot of underscore in my variable names, so I turn this off by default and instead insert arrows <code>&lt;-</code> with <code>M--</code> (meta + dash)</li>
+</ul>
+
+<p>My <code>.emacs</code> is fairly vanilla, but I can&rsquo;t imagine programming without these small customizations.</p>
+
+<p>And while vim certainly has its pluses (its everywhere by default!), emacs will always be my number one.</p>
+
+<pre><code>;; Package Repositories --------------------------------------------------------
+(package-initialize)
+(setq package-archives
+      '((&quot;melpa&quot; . &quot;http://melpa.milkbox.net/packages/&quot;)))
+
+;; Auto-complete in ESS -------------------------------------------------------
+
+(defun my-auto-hook ()
+  (auto-complete-mode 1)
+  ;; Colors
+  (set-face-attribute 'popup-tip-face nil :background &quot;#bfbaac&quot; :foreground &quot;black&quot;)
+  (define-key ac-completing-map [return] nil)
+  (define-key ac-completing-map &quot;\r&quot; nil)
+  )
+(add-hook 'ess-mode-hook 'my-auto-hook)
+(add-hook 'inferior-ess-mode-hook 'my-auto-hook)
+
+(ac-config-default)
+(setq ess-use-auto-complete t)
+
+;; Poly-mode in Emacs --------------------------------------------------------
+
+(defun rmd-mode ()
+  &quot;ESS Markdown mode for rmd files&quot;
+  (interactive)
+  ;; (setq load-path
+  ;; 	(append (list &quot;path/to/polymode/&quot; &quot;path/to/polymode/modes/&quot;)
+  ;; 		load-path))
+  (require 'poly-R)
+  (require 'poly-markdown)
+    (poly-markdown+r-mode))
+
+;; MISC ------------------------------------------------------------------
+
+;; Stefan Avey (stefan.avey@yale.edu) - &quot;smart&quot; underscore
+(global-set-key (kbd &quot;M--&quot;)  (lambda () (interactive) (insert &quot; &lt;- &quot;)))
+
+;; Turn off &quot;smart underscore&quot; ess feature
+;; (with-eval-after-load 'ess (setq ess-toggle-underscore nil))
+;;;; Map C-= to the assignment operator, and leaves _ alone:
+(add-hook 'ess-mode-hook
+	  (lambda ()
+	    ;;        (setq ess-S-assign-key (kbd &quot;C-=&quot;))
+	    ;;        (ess-toggle-S-assign-key t)     ; enable above key definition
+	    (ess-toggle-underscore nil)
+	    (ess-toggle-underscore nil)))   ; leave my underscore key alone!
+
+(add-hook 'inferior-ess-mode-hook
+	  (lambda ()
+	    (ess-toggle-underscore nil)
+	    ;;        (setq ess-S-assign-key (kbd &quot;C-=&quot;))
+	    ;;        (ess-toggle-S-assign-key t)     ; enable above key definition
+	    (ess-toggle-underscore nil)
+	    (ess-toggle-underscore nil)))   ; leave my underscore key alone!
+
+;; Skip splash screen
+(setq inhibit-splash-screen t
+      initial-scratch-message nil
+      initial-major-mode 'org-mode)
+
+;; ess r package mode disable
+;; C-c C-t C-s
+(setq ess-r-package-auto-activate nil)
+
+;; Emacs backup files
+(setq make-backup-files nil)
+
+;; Backup file management
+(setq backup-directory-alist `((&quot;.*&quot; . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms `((&quot;.*&quot; ,temporary-file-directory t)))
+
+;; Default yes and no settings
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; Turn off menu and tool bar
+(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+
+
+;; set custom theme that doesn't override background transparency
+(add-to-list 'custom-theme-load-path &quot;~/.emacs.d/themes/&quot;) 
+(load-theme 'wombat-mod' t)  ;; the t is a &quot;no confirm&quot; flag
+;; load wombat theme
+;; (load-theme 'wombat t)
+
+</code></pre>
+
+    </div>
+
+    <footer>
+        <ul class="stats">
+    
+        
+
+        
+        
+    
+
+    
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="http://robertamezquita.github.io/post/2017-04-06-munging-contiguous-data-to-wide-format/"
+                class="button big previous">Munging Contiguous Data to Wide Format</a></li>
+    
+
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'shortname';
+    var disqus_identifier = 'http:\/\/robertamezquita.github.io\/post\/2017-04-07-my-emacs-setup\/';
+    var disqus_title = 'My `emacs` Setup';
+    var disqus_url = 'http:\/\/robertamezquita.github.io\/post\/2017-04-07-my-emacs-setup\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <img src="/img/main/logo.jpg" class="intro-circle" width="128" alt="Robert A. Amezquita" />
+                
+            
+            
+                <header>
+                    <h2>Robert Amezquita</h2>
+                    <p>Computational Immunologist. Working at the intersection of data science, immunology, and genomics, with some cooking, travel, and dogs in the mix.</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/robertamezquita" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+<li><a href="//bitbucket.com/robert_amezquita" target="_blank" title="Bitbucket" class="fa fa-bitbucket"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//instagram.com/raarjr" target="_blank" title="Instagram" class="fa fa-instagram"></a></li>
+
+
+
+<li><a href="//youtube.com/raarjr" target="_blank" title="YouTube" class="fa fa-youtube"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/raarjr" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//twitter.com/raarjr" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/">My `emacs` Setup</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-07'>
+                                    April 7, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://robertamezquita.github.io/post/2017-04-06-munging-contiguous-data-to-wide-format/">Munging Contiguous Data to Wide Format</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-04-06'>
+                                    April 6, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /blog/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="/categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p>I am passionate about studying how our body generates immunological memory, and subsequently protects us from future challenges, using a data science approach to gain a new perspective on the process. This is where I can log a little about not just my work, but also a little about my many other hobbies.</p>
+
+            <ul class="actions">
+                <li><a href="/about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/robertamezquita" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+<li><a href="//bitbucket.com/robert_amezquita" target="_blank" title="Bitbucket" class="fa fa-bitbucket"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//instagram.com/raarjr" target="_blank" title="Instagram" class="fa fa-instagram"></a></li>
+
+
+
+<li><a href="//youtube.com/raarjr" target="_blank" title="YouTube" class="fa fa-youtube"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/raarjr" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//twitter.com/raarjr" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; R.Amezquita. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+            <script src="/js/jquery.min.js"></script>
+            <script src="/js/skel.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/backToTop.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+        
+
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+    </body>
+</html>
+

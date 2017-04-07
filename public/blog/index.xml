@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on R.Amezquita</title>
+    <link>http://robertamezquita.github.io/blog/index.xml</link>
+    <description>Recent content in Blogs on R.Amezquita</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 04 Apr 2017 14:15:32 -0400</lastBuildDate>
+    <atom:link href="http://robertamezquita.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>A New Hugo Themed Blog</title>
+      <link>http://robertamezquita.github.io/blog/a-new-hugo-theme-blog/</link>
+      <pubDate>Tue, 04 Apr 2017 14:15:32 -0400</pubDate>
+      
+      <guid>http://robertamezquita.github.io/blog/a-new-hugo-theme-blog/</guid>
+      <description>&lt;p&gt;I decided to try retheming my site to be a bit more image focused, and to have a more modern look and feel to it. Just a fun way to spend a couple hours while my computer finishes unborking itself. Featured is a photo of the dogs in their &amp;lsquo;jetpacks&amp;rsquo; (car harnesses) waiting for Jen to come back from her shopping trip.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/</loc>
+    <lastmod>2017-04-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/post/2017-04-06-munging-contiguous-data-to-wide-format/</loc>
+    <lastmod>2017-04-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/blog/a-new-hugo-theme-blog/</loc>
+    <lastmod>2017-04-04T14:15:32-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/post/2017-04-04-test-post/</loc>
+    <lastmod>2017-04-04T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/about/</loc>
+    <lastmod>2017-04-03T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/blog/</loc>
+    <lastmod>2017-04-04T14:15:32-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/post/</loc>
+    <lastmod>2017-04-07T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://robertamezquita.github.io/</loc>
+    <lastmod>2017-04-07T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

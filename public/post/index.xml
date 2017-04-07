@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on R.Amezquita</title>
+    <link>http://robertamezquita.github.io/post/index.xml</link>
+    <description>Recent content in Posts on R.Amezquita</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 07 Apr 2017 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://robertamezquita.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>My `emacs` Setup</title>
+      <link>http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/</link>
+      <pubDate>Fri, 07 Apr 2017 00:00:00 +0000</pubDate>
+      
+      <guid>http://robertamezquita.github.io/post/2017-04-07-my-emacs-setup/</guid>
+      <description>&lt;p&gt;As I&amp;rsquo;ve gone further and further down the rabbit hole of computational biology, one thing that has remained with me is my emacs habit. When I first started graduate school and joined the Kleinstein lab, I was learning R and programming as most do in RStudio. However, my life changed when soon after, Stefan, my best mate, convinced me to give emacs a whirl for R programming.&lt;/p&gt;
+
+&lt;p&gt;Since then, I&amp;rsquo;ve come to appreciate all the more my decision to program the emacs way. The reasons I&amp;rsquo;ve stuck with it are numerous, but the most important are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Flexibility&lt;/em&gt; - emacs has its own shell environment that allows me to simultaneously program in R interactively (via ESS), and switch between the two with ease. This is great for bioinformatics where all too often you need both commandline tools for processing to work in concert with custom analysis scripts&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Fast&lt;/em&gt; - the fastest way to get around a coding document is via emacs&amp;rsquo; advanced motion controls; while some IDEs like RStudio allow for emacs keybindings, all too often its incomplete or neutered. Plus, I find running/sending code in emacs to ESS is much faster to do (muscle memory helps too)&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Customizable&lt;/em&gt; - you can make emacs truly yours in a way no other IDE allows. While I don&amp;rsquo;t go too crazy with this, some customizations are indispensible&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;On this last point, I wanted to post my current &lt;code&gt;.emacs&lt;/code&gt; file to show off some of my customizations (a lot of which is thanks to Stefan). The full &lt;code&gt;.emacs&lt;/code&gt; is posted below, and I&amp;rsquo;ll highlight some of my favorites:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;Package repo MELPA&lt;/em&gt; - indispensible for extra useful package&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Auto-complete in ESS&lt;/em&gt; - makes the terminal feel more like a traditional, GUI IDE&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Poly-mode&lt;/em&gt; - essential for literate programming, here for Rmarkdown &lt;code&gt;.Rmd&lt;/code&gt; files&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Disable smart underscore/insert underscore with _&lt;/em&gt; - I hate the default smart underscore because I use a lot of underscore in my variable names, so I turn this off by default and instead insert arrows &lt;code&gt;&amp;lt;-&lt;/code&gt; with &lt;code&gt;M--&lt;/code&gt; (meta + dash)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;My &lt;code&gt;.emacs&lt;/code&gt; is fairly vanilla, but I can&amp;rsquo;t imagine programming without these small customizations.&lt;/p&gt;
+
+&lt;p&gt;And while vim certainly has its pluses (its everywhere by default!), emacs will always be my number one.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;;; Package Repositories --------------------------------------------------------
+(package-initialize)
+(setq package-archives
+      &#39;((&amp;quot;melpa&amp;quot; . &amp;quot;http://melpa.milkbox.net/packages/&amp;quot;)))
+
+;; Auto-complete in ESS -------------------------------------------------------
+
+(defun my-auto-hook ()
+  (auto-complete-mode 1)
+  ;; Colors
+  (set-face-attribute &#39;popup-tip-face nil :background &amp;quot;#bfbaac&amp;quot; :foreground &amp;quot;black&amp;quot;)
+  (define-key ac-completing-map [return] nil)
+  (define-key ac-completing-map &amp;quot;\r&amp;quot; nil)
+  )
+(add-hook &#39;ess-mode-hook &#39;my-auto-hook)
+(add-hook &#39;inferior-ess-mode-hook &#39;my-auto-hook)
+
+(ac-config-default)
+(setq ess-use-auto-complete t)
+
+;; Poly-mode in Emacs --------------------------------------------------------
+
+(defun rmd-mode ()
+  &amp;quot;ESS Markdown mode for rmd files&amp;quot;
+  (interactive)
+  ;; (setq load-path
+  ;; 	(append (list &amp;quot;path/to/polymode/&amp;quot; &amp;quot;path/to/polymode/modes/&amp;quot;)
+  ;; 		load-path))
+  (require &#39;poly-R)
+  (require &#39;poly-markdown)
+    (poly-markdown+r-mode))
+
+;; MISC ------------------------------------------------------------------
+
+;; Stefan Avey (stefan.avey@yale.edu) - &amp;quot;smart&amp;quot; underscore
+(global-set-key (kbd &amp;quot;M--&amp;quot;)  (lambda () (interactive) (insert &amp;quot; &amp;lt;- &amp;quot;)))
+
+;; Turn off &amp;quot;smart underscore&amp;quot; ess feature
+;; (with-eval-after-load &#39;ess (setq ess-toggle-underscore nil))
+;;;; Map C-= to the assignment operator, and leaves _ alone:
+(add-hook &#39;ess-mode-hook
+	  (lambda ()
+	    ;;        (setq ess-S-assign-key (kbd &amp;quot;C-=&amp;quot;))
+	    ;;        (ess-toggle-S-assign-key t)     ; enable above key definition
+	    (ess-toggle-underscore nil)
+	    (ess-toggle-underscore nil)))   ; leave my underscore key alone!
+
+(add-hook &#39;inferior-ess-mode-hook
+	  (lambda ()
+	    (ess-toggle-underscore nil)
+	    ;;        (setq ess-S-assign-key (kbd &amp;quot;C-=&amp;quot;))
+	    ;;        (ess-toggle-S-assign-key t)     ; enable above key definition
+	    (ess-toggle-underscore nil)
+	    (ess-toggle-underscore nil)))   ; leave my underscore key alone!
+
+;; Skip splash screen
+(setq inhibit-splash-screen t
+      initial-scratch-message nil
+      initial-major-mode &#39;org-mode)
+
+;; ess r package mode disable
+;; C-c C-t C-s
+(setq ess-r-package-auto-activate nil)
+
+;; Emacs backup files
+(setq make-backup-files nil)
+
+;; Backup file management
+(setq backup-directory-alist `((&amp;quot;.*&amp;quot; . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms `((&amp;quot;.*&amp;quot; ,temporary-file-directory t)))
+
+;; Default yes and no settings
+(defalias &#39;yes-or-no-p &#39;y-or-n-p)
+
+;; Turn off menu and tool bar
+(if (fboundp &#39;tool-bar-mode) (tool-bar-mode -1))
+(if (fboundp &#39;menu-bar-mode) (menu-bar-mode -1))
+
+
+;; set custom theme that doesn&#39;t override background transparency
+(add-to-list &#39;custom-theme-load-path &amp;quot;~/.emacs.d/themes/&amp;quot;) 
+(load-theme &#39;wombat-mod&#39; t)  ;; the t is a &amp;quot;no confirm&amp;quot; flag
+;; load wombat theme
+;; (load-theme &#39;wombat t)
+
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Munging Contiguous Data to Wide Format</title>
+      <link>http://robertamezquita.github.io/post/2017-04-06-munging-contiguous-data-to-wide-format/</link>
+      <pubDate>Thu, 06 Apr 2017 00:00:00 +0000</pubDate>
+      
+      <guid>http://robertamezquita.github.io/post/2017-04-06-munging-contiguous-data-to-wide-format/</guid>
+      <description>&lt;!-- BLOGDOWN-HEAD --&gt;
+&lt;!-- /BLOGDOWN-HEAD --&gt;
+
+&lt;!-- BLOGDOWN-BODY-BEFORE --&gt;
+&lt;!-- /BLOGDOWN-BODY-BEFORE --&gt;
+&lt;p&gt;Here I just wanted to take a quick second to share a small code snippet that illustrates munging a contiguous dataset to a wide format.&lt;/p&gt;
+&lt;p&gt;What do I mean by that? Consider the following example: let’s say we have a dataset where we have patients A, B, and C, and we take two tissues from each patient - one of Serum and one of TIF (tumor interstitial fluid), and from each tissue assay a whole host of metabolites, each with its own column. If we want to take the log2 fold-change of Serum vs. TIF for each patient, its tricky to do in Excel when the data is spread out contiguously, across rows.&lt;/p&gt;
+&lt;p&gt;So how can we tackle this sort of problem in R? Making use of the &lt;code&gt;tidyverse&lt;/code&gt;, the key here is to first gather the metabolites, such that we have a new column named &lt;code&gt;metabolite&lt;/code&gt; describing what is being assayed, and a &lt;code&gt;value&lt;/code&gt; column with the readout.&lt;/p&gt;
+&lt;p&gt;Now, after this we still have our tissue (specimen type) being Serum vs. TIF. If we want to easily compare the two, it’s easier to &lt;code&gt;spread&lt;/code&gt; these values out across columns, such that we have one row per patient, with two columns, &lt;code&gt;Serum&lt;/code&gt; and &lt;code&gt;TIF&lt;/code&gt;, deriving their values from our freshly created &lt;code&gt;value&lt;/code&gt; column, with &lt;code&gt;metabolite&lt;/code&gt; still describing each assay.&lt;/p&gt;
+&lt;p&gt;In code, this is what the process looks like below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## Create example data
+dat &amp;lt;- tribble(
+    ~Patient.ID, ~Tissue, ~Glucose, ~Pyruvate, ~Glutamate,
+    &amp;#39;CR1&amp;#39;,       &amp;#39;Serum&amp;#39;,        1,         2,          3,
+    &amp;#39;CR1&amp;#39;,         &amp;#39;TIF&amp;#39;,        4,         3,         10,
+    &amp;#39;CR2&amp;#39;,       &amp;#39;Serum&amp;#39;,       11,         2,          5,
+    &amp;#39;CR2&amp;#39;,         &amp;#39;TIF&amp;#39;,        5,         10,         4
+)
+dat&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 4 × 5
+##   Patient.ID Tissue Glucose Pyruvate Glutamate
+##        &amp;lt;chr&amp;gt;  &amp;lt;chr&amp;gt;   &amp;lt;dbl&amp;gt;    &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
+## 1        CR1  Serum       1        2         3
+## 2        CR1    TIF       4        3        10
+## 3        CR2  Serum      11        2         5
+## 4        CR2    TIF       5       10         4&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## Tidy-ify data for easy calculations
+## Key steps here:
+## - gather: this will take all the different readouts
+##     and put them together under a new column specifying
+##     the metabolite, and a separate column with the value
+## - spread: this takes your data and instead of having
+##     a separate row for each Serum and TIF reading, we
+##     create two new columns each for Serum and TIF, and
+##     spread our `value` column out. less tidy, but better
+##     for log2foldchange calculations
+tidy_dat &amp;lt;- dat %&amp;gt;%
+    tidyr::gather(metabolite, value,
+                  -Patient.ID, -Tissue) %&amp;gt;%
+    spread(Tissue, value)
+tidy_dat&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 × 4
+##   Patient.ID metabolite Serum   TIF
+## *      &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;
+## 1        CR1    Glucose     1     4
+## 2        CR1  Glutamate     3    10
+## 3        CR1   Pyruvate     2     3
+## 4        CR2    Glucose    11     5
+## 5        CR2  Glutamate     5     4
+## 6        CR2   Pyruvate     2    10&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## Calculate fold-change across tissues per patient
+## All we do here is a `mutate()` step, which
+## creates a new column based on some input, in this case
+## log2 foldchange of the column Serum over TIF
+pc &amp;lt;- 0.01  # pseudocount for lfc calc
+
+calc_dat &amp;lt;- tidy_dat %&amp;gt;%
+    dplyr::mutate(
+               lfc_Serum_TIF = log2((Serum + pc) / (TIF + pc))
+           )
+calc_dat&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 × 5
+##   Patient.ID metabolite Serum   TIF lfc_Serum_TIF
+##        &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;         &amp;lt;dbl&amp;gt;
+## 1        CR1    Glucose     1     4        -1.989
+## 2        CR1  Glutamate     3    10        -1.734
+## 3        CR1   Pyruvate     2     3        -0.583
+## 4        CR2    Glucose    11     5         1.136
+## 5        CR2  Glutamate     5     4         0.321
+## 6        CR2   Pyruvate     2    10        -2.316&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Test Post</title>
+      <link>http://robertamezquita.github.io/post/2017-04-04-test-post/</link>
+      <pubDate>Tue, 04 Apr 2017 00:00:00 +0000</pubDate>
+      
+      <guid>http://robertamezquita.github.io/post/2017-04-04-test-post/</guid>
+      <description>&lt;p&gt;Trying out a new post just to see how this system works. Already found that (featured) images don’t seem to be working on the home page, but do work on the /blog/ subdomain. Also I need to make sure to set the “type: ‘post’” in the YAML header. Anyways, let’s see how beautifully R code renders now again more..&lt;/p&gt;
+&lt;!--more--&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## run in a chunk with `include = FALSE`
+## library(tidyverse) 
+
+## Run within this chunk with echo = TRUE
+hello_world &amp;lt;- frame_data(
+    ~first, ~second, ~third, ~fourth,
+    &amp;quot;its&amp;quot;, &amp;quot;a&amp;quot;, &amp;quot;beautiful&amp;quot;, &amp;quot;day&amp;quot;
+)
+
+hello_world&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 1 × 4
+##   first second     third fourth
+##   &amp;lt;chr&amp;gt;  &amp;lt;chr&amp;gt;     &amp;lt;chr&amp;gt;  &amp;lt;chr&amp;gt;
+## 1   its      a beautiful    day&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now what happens when I generate a plot?&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;frame_data(
+    ~one, ~two,
+    1, 2,
+    1, 2
+) %&amp;gt;%
+    ggplot(aes(x = one, y = two)) +
+    geom_point() +
+    theme_classic()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;http://robertamezquita.github.io/post/2017-04-04-test-post_files/figure-html/test2-1.png&#34; width=&#34;192&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looking beautiful!! And yes, I am a &lt;code&gt;theme_classic()&lt;/code&gt; kind of person myself, though I also enjoy using the &lt;code&gt;cowplot&lt;/code&gt; package for really nice plot setting.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

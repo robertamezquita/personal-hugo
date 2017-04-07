@@ -1,6 +1,6 @@
 ---
 title: My `emacs` Setup
-author: ~
+author: Robert A. Amezquita
 date: '2017-04-07'
 slug: ''
 categories: []
