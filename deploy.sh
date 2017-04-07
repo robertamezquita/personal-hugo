@@ -2,8 +2,8 @@
 
 ## If deploy stops working for whatever reason, remove public and run:
 rm -rf public
-git rm --cached public
-git submodule add -b master git@github.com:robertamezquita/robertamezquita.github.io.git public
+git rm -r --cached public
+git submodule add --force -b master git@github.com:robertamezquita/robertamezquita.github.io.git public
 
 ## For notes on script and setting up the repo, see:
 ## https://gohugo.io/tutorials/github-pages-blog/
