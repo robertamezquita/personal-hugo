@@ -1,0 +1,185 @@
+---
+title: Analysis in Practice Part 1 - Cleanup
+author: Robert A. Amezquita
+date: '2017-04-17'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+I've been really enjoying reading David Robinson's 'Introduction to Empirical Bayes' book. While I've taken multiple stats classes as a graduate student, it is refreshing to have a practical guide to applying Bayesian methods to the analysis of real world data, I especially am enjoying the book because compared to purely theoretical, formula heavy sorts of courses, David Robinson's book presents first and foremost the intuition behind the madness, and steps through all the additional complications that can really imbue power behind these statistical methods.
+
+And, as a bonus, I can now clearly imagine my datasets consisting of genes as tiny little baseball players vying to get more at-bats so that they can become the next Mike Piazza of the genome.
+
+<!--more-->
+
+Now, I'll admit, I'm not a huge baseball fan (even though I am a huge admirer of sabermetrics). But I do enjoy watching the NFL on ocassion (less so since the Chargers have been jerks to my beloved hometown and taken Philip Rivers with them to Los Angeles). And so that brings me to applying these methods to a QB focused, NFL dataset.  With a quick search, I found this [Kaggle dataset](https://www.kaggle.com/speckledpingu/nfl-qb-stats/version/1) of QB stats from 1996 to 2016. 
+
+In this first post, I want to first show some of the things I do when I first get a dataset - in particular, cleaning the data and doing some preliminary inspection. Let's dive in!
+
+
+### The Right Tools for the Job: `Tidyverse`
+
+Without the right tools, it becomes much harder to do a job correctly and, more so, efficiently. My programming language of choice is `R`, primarily because it has my new favorite swiss army knife - the `tidyverse`. It is not only a toolset but also a philosophy underlying data organization that I don't have the space to get into here (and frankly, that is much more eloquently detailed elsewhere), but suffice it to say that most of the code herein uses `tidyverse` tools as opposed to base `R`. I'll try to show the specific package a function comes from using the `<package>::<function>` annotation as much as possible, but you can also search for a function's origin using the `??<function>` command in `R`.
+
+
+### First Pass Inspection
+
+Let's start with just reading in the data, and giving it a quick look using `tibble::glimpse`.
+
+```{r, warning = FALSE, message = FALSE}
+
+library(tidyverse) ## loads dplyr, tidyr, ggplot2, etc.
+library(stringr)   ## great for strings
+library(forcats)   ## great for dealing with factors
+
+## File path - split up for to reduce line width
+path <- paste0("../../static/post/",
+               "2017-04-17-analyzing-qbs-empirical-bayes/",
+               "QBStats_all.csv.gz")
+
+## Read in the (compressed) CSV
+raw <- readr::read_csv(path)
+
+## View each variable and first observations
+glimpse(raw, width = 43)
+
+```
+
+I won't delve into the columns and what they mean in this post, but suffice it to say that each row pertains to a given quarterback's performance metrics over the course of a year. 
+
+### Fixing Up Names Using `stringr` and `map`
+
+Now, we see one immediate problem: the `qb` column values look attrocious. Specifically, it seems the name is repeated, with a space in the first iteration and first initial separated from the last name by an underscore on the second iteration.
+
+Here's where the `stringr` library comes in - we need to parse this `qb` column - I'm going to create a "<last>, <first>" format for this column using a function I'm calling `.parse_qb` (I use the `.` to prepend functions when its very specific to the dataset/use-case). Also, one interesting thing to note is the "underscore" is not really an underscore, but some other non-standard character that took me a bit to debug. Always watch those encodings!
+
+```{r}
+
+## Parse QB column to "<last>, <first>" format
+.parse_qb <- function(x) {
+    y <- stringr::str_split(x, " ") %>% unlist
+    last <- stringr::str_split(y[2], " ") %>%
+        unlist %>% .[2] # Note encoding of pseudo underscore
+    first <- y[1]
+    name <- paste0(last, ", ", first)
+    return(name)
+}
+
+raw %>%
+    mutate(qb = map_chr(qb, .parse_qb)) %>% ## See note below
+    select(qb) %>% head(3)
+
+```
+
+Much better (at least, per this first group of names!)! One of my new favorite functions here is the `map` family from the `purrr` package. This family functions in a similar spirit as `lapply`, but is much neater in its application and also has subfunctions that can specify the returned output's type - in this case, I specify that the output will be a character string (hence the `_chr` suffix). And when paired with the `dplyr::mutate` function to change/add columns, it really shines for munging data and *mise en place*. 
+
+But okay, so we parsed the `qb` column..but did it happen correctly? Now, in writing this post, I was working on filtering out `NA` values, and found that some of the names indeed had `NA` values for the first name group! And sometimes that's exactly how you find errors - by chance. I could've avoided this by having a more exhaustive test case list in my case. Anyways, I'll show one example that was broken: Odell Beckham Jr.
+
+```{r}
+
+odell <- stringr::str_subset(raw$qb, "Odell")[1]
+ryan <- raw$qb[1]
+
+## Raw
+ryan
+odell
+
+## Parsed v1
+.parse_qb(ryan)
+.parse_qb(odell) 
+
+```
+
+Yikes! While Matt Ryan's is fine, Odell's first name is evaluating to an `NA`. And the issue is coming from using a space to separate the first time. So let's take a different tact: since the entire name is before the weird underscore, let's split on that and the dot to get a first field, then remove the last letter if it is uppercase (aka, a first initial). 
+
+
+```{r}
+
+## Parse QB column to "<last>, <first>" format
+.parse_qb_v2 <- function(x) {
+    ## Initial parsing by pseudo-underscore and period
+    ## Extract "<first> <last><first initial>."
+    y <- str_split(x, " ") %>%
+        unlist %>% .[1] %>%
+        str_split("\\.") %>%
+        unlist %>% .[1] 
+
+    ## Split by character
+    split <- str_split(y, "") %>% unlist
+
+    ## Check if last letter is uppercase
+    last_letter_upper <- split %>%
+        .[length(.)] %>%
+        str_detect(., toupper(letters)) %>%
+        sum > 0
+
+    ## Drop last letter if its uppercase (eg first initial)
+    if (last_letter_upper == TRUE) {
+        name <- split[-length(split)] %>% paste(collapse = "")
+    } else {
+        name <- split %>% paste(collapse = "")
+    }
+
+    return(name)
+}
+
+```
+
+Much more code here than the first pass, but now let's check our test cases:
+
+```{r}
+
+.parse_qb_v2(odell)
+.parse_qb_v2(ryan)
+
+```
+
+And now it finally works for both our test cases, and could even automate testing using a package like `testhat`. Phew! Just goes to show, a little error checking goes a long way when munging! And now we have a function that clean our `qb` column.
+
+### Checking for `NA` Values
+
+Another common task is to identify rows with `NA` values. Sometimes its appropriate to keep them in place, or re-encode them even, but first let's inspect them to make sure we won't miss anything important and assess how many we have. We'll use the base function `complete.cases`, passing in the dataset using the `.` (dot) notation from the `%>%` (pipe) to `dplyr::filter` down to only rows with `NA` values, and look at the number of rows with such `NA` values, and inspect some examples.
+
+```{r}
+
+## Identify QB's with incomplete records
+incomplete <- raw %>%
+    filter(!complete.cases(.)) 
+
+nrow(incomplete) ## number of rows with >0 NA vals
+
+glimpse(incomplete, width = 43)
+
+```
+
+So it looks like we have 17 rows with NA values, occuring in columns like interceptions, sacks, longest pass (lg) across Michael Pittman and others.
+
+Here is where some sleuthing comes in: is there something in common between where all these NA values occur?
+
+```{r}
+
+incomplete$year %>% table
+incomplete$att 
+
+```
+
+Looking at the years in which we have the NA values, we see that it only seems to be 2009 that is affected. Then, if we look at attempts, we see that most of these are very low attempt years by these QB's - most likely backups or wildcat plays (where say, a wide receiver throws the ball in a trick play). 
+
+So we can either ignore the NA values, and hope no errors are introduced downstream, or simply remove them. For now, we'll go with keeping them for completeness, but probably won't lose sleep if we remove them later on. 
+
+
+### Odell's Short QB Career
+
+For any NFL savvy readers, you might notice that Odell Beckham Jr is *not* a QB, but rather a wide receiver! That's probably because he was part of a trick play where he threw the ball. We'll have to keep this in mind as we go downstream, that there are pretender "QBs" in our dataset, and also backups who get almost no play time, that we may want to remove from consideration downstream.
+
+
+### Wrap-up
+
+These are just some of the things I do to first clean the dataset, but we haven't yet explored the data thoroughly! We'll get to that in a subsequent post, after we tidy it for ease of use with the `tidyverse`.

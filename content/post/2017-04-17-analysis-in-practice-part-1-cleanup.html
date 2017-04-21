@@ -1,0 +1,180 @@
+---
+title: Analysis in Practice Part 1 - Cleanup
+author: Robert A. Amezquita
+date: '2017-04-17'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+<!-- BLOGDOWN-HEAD -->
+<!-- /BLOGDOWN-HEAD -->
+
+<!-- BLOGDOWN-BODY-BEFORE -->
+<!-- /BLOGDOWN-BODY-BEFORE -->
+<p>I’ve been really enjoying reading David Robinson’s ‘Introduction to Empirical Bayes’ book. While I’ve taken multiple stats classes as a graduate student, it is refreshing to have a practical guide to applying Bayesian methods to the analysis of real world data, I especially am enjoying the book because compared to purely theoretical, formula heavy sorts of courses, David Robinson’s book presents first and foremost the intuition behind the madness, and steps through all the additional complications that can really imbue power behind these statistical methods.</p>
+<p>And, as a bonus, I can now clearly imagine my datasets consisting of genes as tiny little baseball players vying to get more at-bats so that they can become the next Mike Piazza of the genome.</p>
+<!--more-->
+<p>Now, I’ll admit, I’m not a huge baseball fan (even though I am a huge admirer of sabermetrics). But I do enjoy watching the NFL on ocassion (less so since the Chargers have been jerks to my beloved hometown and taken Philip Rivers with them to Los Angeles). And so that brings me to applying these methods to a QB focused, NFL dataset. With a quick search, I found this <a href="https://www.kaggle.com/speckledpingu/nfl-qb-stats/version/1">Kaggle dataset</a> of QB stats from 1996 to 2016.</p>
+<p>In this first post, I want to first show some of the things I do when I first get a dataset - in particular, cleaning the data and doing some preliminary inspection. Let’s dive in!</p>
+<div id="the-right-tools-for-the-job-tidyverse" class="section level3">
+<h3>The Right Tools for the Job: <code>Tidyverse</code></h3>
+<p>Without the right tools, it becomes much harder to do a job correctly and, more so, efficiently. My programming language of choice is <code>R</code>, primarily because it has my new favorite swiss army knife - the <code>tidyverse</code>. It is not only a toolset but also a philosophy underlying data organization that I don’t have the space to get into here (and frankly, that is much more eloquently detailed elsewhere), but suffice it to say that most of the code herein uses <code>tidyverse</code> tools as opposed to base <code>R</code>. I’ll try to show the specific package a function comes from using the <code>&lt;package&gt;::&lt;function&gt;</code> annotation as much as possible, but you can also search for a function’s origin using the <code>??&lt;function&gt;</code> command in <code>R</code>.</p>
+</div>
+<div id="first-pass-inspection" class="section level3">
+<h3>First Pass Inspection</h3>
+<p>Let’s start with just reading in the data, and giving it a quick look using <code>tibble::glimpse</code>.</p>
+<pre class="r"><code>library(tidyverse) ## loads dplyr, tidyr, ggplot2, etc.
+library(stringr)   ## great for strings
+library(forcats)   ## great for dealing with factors
+
+## File path - split up for to reduce line width
+path &lt;- paste0(&quot;../../static/post/&quot;,
+               &quot;2017-04-17-analyzing-qbs-empirical-bayes/&quot;,
+               &quot;QBStats_all.csv.gz&quot;)
+
+## Read in the (compressed) CSV
+raw &lt;- readr::read_csv(path)
+
+## View each variable and first observations
+glimpse(raw, width = 43)</code></pre>
+<pre><code>## Observations: 12,556
+## Variables: 13
+## $ qb         &lt;chr&gt; &quot;Matt RyanM. Ryan&quot;,...
+## $ att        &lt;int&gt; 34, 37, 11, 36, 40,...
+## $ cmp        &lt;int&gt; 25, 23, 10, 23, 31,...
+## $ yds        &lt;dbl&gt; 344, 261, 75, 219, ...
+## $ ypa        &lt;dbl&gt; 10.1, 7.1, 6.8, 6.1...
+## $ td         &lt;int&gt; 4, 3, 1, 2, 1, 0, 4...
+## $ int        &lt;int&gt; 0, 0, 0, 1, 0, 2, 2...
+## $ lg         &lt;chr&gt; &quot;32t&quot;, &quot;28&quot;, &quot;13&quot;, ...
+## $ sack       &lt;dbl&gt; 2, 2, 0, 1, 2, 2, 1...
+## $ loss       &lt;dbl&gt; 19, 10, 0, 5, 14, 1...
+## $ rate       &lt;dbl&gt; 144.7, 110.3, 125.4...
+## $ GamePoints &lt;int&gt; 43, 28, 28, 22, 16,...
+## $ year       &lt;int&gt; 2016, 2016, 2016, 2...</code></pre>
+<p>I won’t delve into the columns and what they mean in this post, but suffice it to say that each row pertains to a given quarterback’s performance metrics over the course of a year.</p>
+</div>
+<div id="fixing-up-names-using-stringr-and-map" class="section level3">
+<h3>Fixing Up Names Using <code>stringr</code> and <code>map</code></h3>
+<p>Now, we see one immediate problem: the <code>qb</code> column values look attrocious. Specifically, it seems the name is repeated, with a space in the first iteration and first initial separated from the last name by an underscore on the second iteration.</p>
+<p>Here’s where the <code>stringr</code> library comes in - we need to parse this <code>qb</code> column - I’m going to create a “<last>, <first>” format for this column using a function I’m calling <code>.parse_qb</code> (I use the <code>.</code> to prepend functions when its very specific to the dataset/use-case). Also, one interesting thing to note is the “underscore” is not really an underscore, but some other non-standard character that took me a bit to debug. Always watch those encodings!</p>
+<pre class="r"><code>## Parse QB column to &quot;&lt;last&gt;, &lt;first&gt;&quot; format
+.parse_qb &lt;- function(x) {
+    y &lt;- stringr::str_split(x, &quot; &quot;) %&gt;% unlist
+    last &lt;- stringr::str_split(y[2], &quot; &quot;) %&gt;%
+        unlist %&gt;% .[2] # Note encoding of pseudo underscore
+    first &lt;- y[1]
+    name &lt;- paste0(last, &quot;, &quot;, first)
+    return(name)
+}
+
+raw %&gt;%
+    mutate(qb = map_chr(qb, .parse_qb)) %&gt;% ## See note below
+    select(qb) %&gt;% head(3)</code></pre>
+<pre><code>## # A tibble: 3 × 1
+##                qb
+##             &lt;chr&gt;
+## 1      Ryan, Matt
+## 2 Winston, Jameis
+## 3   Glennon, Mike</code></pre>
+<p>Much better (at least, per this first group of names!)! One of my new favorite functions here is the <code>map</code> family from the <code>purrr</code> package. This family functions in a similar spirit as <code>lapply</code>, but is much neater in its application and also has subfunctions that can specify the returned output’s type - in this case, I specify that the output will be a character string (hence the <code>_chr</code> suffix). And when paired with the <code>dplyr::mutate</code> function to change/add columns, it really shines for munging data and <em>mise en place</em>.</p>
+<p>But okay, so we parsed the <code>qb</code> column..but did it happen correctly? Now, in writing this post, I was working on filtering out <code>NA</code> values, and found that some of the names indeed had <code>NA</code> values for the first name group! And sometimes that’s exactly how you find errors - by chance. I could’ve avoided this by having a more exhaustive test case list in my case. Anyways, I’ll show one example that was broken: Odell Beckham Jr.</p>
+<pre class="r"><code>odell &lt;- stringr::str_subset(raw$qb, &quot;Odell&quot;)[1]
+ryan &lt;- raw$qb[1]
+
+## Raw
+ryan</code></pre>
+<pre><code>## [1] &quot;Matt RyanM. Ryan&quot;</code></pre>
+<pre class="r"><code>odell</code></pre>
+<pre><code>## [1] &quot;Odell Beckham Jr.O. Beckham&quot;</code></pre>
+<pre class="r"><code>## Parsed v1
+.parse_qb(ryan)</code></pre>
+<pre><code>## [1] &quot;Ryan, Matt&quot;</code></pre>
+<pre class="r"><code>.parse_qb(odell) </code></pre>
+<pre><code>## [1] &quot;NA, Odell&quot;</code></pre>
+<p>Yikes! While Matt Ryan’s is fine, Odell’s first name is evaluating to an <code>NA</code>. And the issue is coming from using a space to separate the first time. So let’s take a different tact: since the entire name is before the weird underscore, let’s split on that and the dot to get a first field, then remove the last letter if it is uppercase (aka, a first initial).</p>
+<pre class="r"><code>## Parse QB column to &quot;&lt;last&gt;, &lt;first&gt;&quot; format
+.parse_qb_v2 &lt;- function(x) {
+    ## Initial parsing by pseudo-underscore and period
+    ## Extract &quot;&lt;first&gt; &lt;last&gt;&lt;first initial&gt;.&quot;
+    y &lt;- str_split(x, &quot; &quot;) %&gt;%
+        unlist %&gt;% .[1] %&gt;%
+        str_split(&quot;\\.&quot;) %&gt;%
+        unlist %&gt;% .[1] 
+
+    ## Split by character
+    split &lt;- str_split(y, &quot;&quot;) %&gt;% unlist
+
+    ## Check if last letter is uppercase
+    last_letter_upper &lt;- split %&gt;%
+        .[length(.)] %&gt;%
+        str_detect(., toupper(letters)) %&gt;%
+        sum &gt; 0
+
+    ## Drop last letter if its uppercase (eg first initial)
+    if (last_letter_upper == TRUE) {
+        name &lt;- split[-length(split)] %&gt;% paste(collapse = &quot;&quot;)
+    } else {
+        name &lt;- split %&gt;% paste(collapse = &quot;&quot;)
+    }
+
+    return(name)
+}</code></pre>
+<p>Much more code here than the first pass, but now let’s check our test cases:</p>
+<pre class="r"><code>.parse_qb_v2(odell)</code></pre>
+<pre><code>## [1] &quot;Odell Beckham Jr&quot;</code></pre>
+<pre class="r"><code>.parse_qb_v2(ryan)</code></pre>
+<pre><code>## [1] &quot;Matt Ryan&quot;</code></pre>
+<p>And now it finally works for both our test cases, and could even automate testing using a package like <code>testhat</code>. Phew! Just goes to show, a little error checking goes a long way when munging! And now we have a function that clean our <code>qb</code> column.</p>
+</div>
+<div id="checking-for-na-values" class="section level3">
+<h3>Checking for <code>NA</code> Values</h3>
+<p>Another common task is to identify rows with <code>NA</code> values. Sometimes its appropriate to keep them in place, or re-encode them even, but first let’s inspect them to make sure we won’t miss anything important and assess how many we have. We’ll use the base function <code>complete.cases</code>, passing in the dataset using the <code>.</code> (dot) notation from the <code>%&gt;%</code> (pipe) to <code>dplyr::filter</code> down to only rows with <code>NA</code> values, and look at the number of rows with such <code>NA</code> values, and inspect some examples.</p>
+<pre class="r"><code>## Identify QB&#39;s with incomplete records
+incomplete &lt;- raw %&gt;%
+    filter(!complete.cases(.)) 
+
+nrow(incomplete) ## number of rows with &gt;0 NA vals</code></pre>
+<pre><code>## [1] 17</code></pre>
+<pre class="r"><code>glimpse(incomplete, width = 43)</code></pre>
+<pre><code>## Observations: 17
+## Variables: 13
+## $ qb         &lt;chr&gt; &quot;Michael PittmanM. ...
+## $ att        &lt;int&gt; 18, 9, 2, 3, 19, 5,...
+## $ cmp        &lt;int&gt; 58, 43, 1, -6, 45, ...
+## $ yds        &lt;dbl&gt; 3.22, 4.78, 0.50, -...
+## $ ypa        &lt;dbl&gt; 9, 18, 1, 0, 8, 7, ...
+## $ td         &lt;int&gt; 2, 0, 1, 0, 0, 0, 0...
+## $ int        &lt;int&gt; NA, NA, NA, NA, NA,...
+## $ lg         &lt;chr&gt; NA, NA, NA, NA, NA,...
+## $ sack       &lt;dbl&gt; NA, NA, NA, NA, NA,...
+## $ loss       &lt;dbl&gt; NA, NA, NA, NA, NA,...
+## $ rate       &lt;dbl&gt; NA, NA, NA, NA, NA,...
+## $ GamePoints &lt;int&gt; 34, 34, 34, 34, 27,...
+## $ year       &lt;int&gt; 2009, 2009, 2009, 2...</code></pre>
+<p>So it looks like we have 17 rows with NA values, occuring in columns like interceptions, sacks, longest pass (lg) across Michael Pittman and others.</p>
+<p>Here is where some sleuthing comes in: is there something in common between where all these NA values occur?</p>
+<pre class="r"><code>incomplete$year %&gt;% table</code></pre>
+<pre><code>## .
+## 2009 
+##   17</code></pre>
+<pre class="r"><code>incomplete$att </code></pre>
+<pre><code>##  [1] 18  9  2  3 19  5  4 16  8  7  2  1 12  2  3  3  3</code></pre>
+<p>Looking at the years in which we have the NA values, we see that it only seems to be 2009 that is affected. Then, if we look at attempts, we see that most of these are very low attempt years by these QB’s - most likely backups or wildcat plays (where say, a wide receiver throws the ball in a trick play).</p>
+<p>So we can either ignore the NA values, and hope no errors are introduced downstream, or simply remove them. For now, we’ll go with keeping them for completeness, but probably won’t lose sleep if we remove them later on.</p>
+</div>
+<div id="odells-short-qb-career" class="section level3">
+<h3>Odell’s Short QB Career</h3>
+<p>For any NFL savvy readers, you might notice that Odell Beckham Jr is <em>not</em> a QB, but rather a wide receiver! That’s probably because he was part of a trick play where he threw the ball. We’ll have to keep this in mind as we go downstream, that there are pretender “QBs” in our dataset, and also backups who get almost no play time, that we may want to remove from consideration downstream.</p>
+</div>
+<div id="wrap-up" class="section level3">
+<h3>Wrap-up</h3>
+<p>These are just some of the things I do to first clean the dataset, but we haven’t yet explored the data thoroughly! We’ll get to that in a subsequent post, after we tidy it for ease of use with the <code>tidyverse</code>.</p>
+</div>
