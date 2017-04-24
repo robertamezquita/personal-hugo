@@ -1,0 +1,213 @@
+---
+title: Analysis in Practice Part 2 - Tidy
+author: Robert A. Amezquita
+date: '2017-04-23'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+This is the second part of a series of posts working with an NFL quarterback data, following up after doing some initial [cleanup](http://robertamezquita.github.io/post/2017-04-17-analysis-in-practice-part-1-cleanup/). Here, I'll focus on how I like to format data for optimal tidyness - the tidy (also known as long) format.
+
+### A Small Example
+
+Typically, when we get a dataset, we'll see it as a series of columns (variables) with values across many rows (each an observation). This format - the wide format - is certainly amenable for human parsing, and also implies a relationship between a single observation across multiple variables. 
+
+What do I mean by this? Let's take a look at a quick example in code of what we might get in wide format.
+
+```{r, message = FALSE}
+
+library(tidyverse)
+
+wide_data <- tribble(
+    ~id, ~height, ~width,
+    "A",      10,     20,
+    "B",      5,      11,
+    "C",      7,      12
+)
+
+```
+
+Note here how I'm using the `tibble` package `tribble` function to specify the data object (compared to a regular data frame). So you can see we have two variables - height and width - measured for three objects with id's A, B, and C. 
+
+But what if instead of this wide format, we turn it into a *long* format? In other words, we can *gather* the values and make the following..
+
+```{r, message = FALSE}
+
+long_data <- wide_data %>%
+    gather(variable, value, -id)
+
+long_data
+
+```
+
+While this long format is not as easily readable for humans, it is *much* more readable for our `tidyverse` tools, such as `ggplot2` for visualization, and `dplyr` for doing things like summaries of different variables. Let's try the latter, and doing a summary here of height and width across our observations, A through C.
+
+```{r}
+
+summary <- long_data %>%
+    group_by(variable) %>%
+    summarise(average = mean(value)) %>%
+    mutate(average = round(average, digits = 2))
+
+summary
+
+
+```
+
+Here, the function names say it all: I group based on the measurement being taken, and then do a summary (in this case, an average) for each of those groups - height and width. Then the final mutate step just takes the newly created column, `average`, and round it down to two digits.
+
+This is a pretty trivial example, but when you have lots of data this transformation from wide to long is extremely useful. So, to make a long story short: wide data is great for humans, and long data is great for modern R idioms of programming in the tidyverse.
+
+
+### Back to Our NFL QB Data
+
+Let's go back to our dataset from following the first post, and refresh ourselves on what it looks like:
+
+```{r, include = FALSE}
+
+## Parse QB column to "<last>, <first>" format
+.parse_qb_v2 <- function(x) {
+    ## Initial parsing by pseudo-underscore and period
+    ## Extract "<first> <last><first initial>."
+    y <- stringr::str_split(x, " ") %>%
+        unlist %>% .[1] %>%
+        stringr::str_split("\\.") %>%
+        unlist %>% .[1] 
+
+    ## Split by character
+    split <- stringr::str_split(y, "") %>% unlist
+
+    ## Check if last letter is uppercase
+    last_letter_upper <- split %>%
+        .[length(.)] %>%
+        stringr::str_detect(., toupper(letters)) %>%
+        sum > 0
+
+    ## Drop last letter if its uppercase (eg first initial)
+    if (last_letter_upper == TRUE) {
+        name <- split[-length(split)] %>% paste(collapse = "")
+    } else {
+        name <- split %>% paste(collapse = "")
+    }
+
+    return(name)
+}
+
+## File path - split up for to reduce line width
+path <- paste0("../../static/post/",
+               "2017-04-17-analyzing-qbs-empirical-bayes/",
+               "QBStats_all.csv.gz")
+
+## Read in the (compressed) CSV
+raw <- readr::read_csv(path) %>%
+    mutate(qb = map_chr(qb, .parse_qb_v2))
+
+```
+
+```{r}
+
+glimpse(raw) ## Invisibly loaded/cleaned data 
+
+```
+
+### A Quick Inspection and Debugging
+
+So we can see that we have a bunch of variables for each quarterback in this wide format. Let's turn it into the long format similar to above. 
+
+
+```{r}
+
+dat <- raw %>%
+    gather(variable, value, -qb)
+dat
+
+```
+
+Odd, we see that the value column is also a character! That's not good. Let's look at what's causing that by trying to convert the value column to numeric, and seeing where it fails:
+
+```{r}
+
+tmp <- dat %>%
+    mutate(value = as.numeric(value))
+
+## Filter on NA values where numeric conversion fails
+## Then take unique values and print first 5
+dat %>%
+    filter(tmp$value %>% is.na) %>%
+    select(value) %>% unique %>%
+    print(n = 5)
+
+```
+
+Hmm, so seems we have trailing 't' letters in some of the values (associated with the longest throw metric). We can clip these trailing t's using the `stringr` library and then do the conversion again.
+
+```{r}
+
+.clip_t <- function(x) {
+    stringr::str_replace(x, "t", "") %>%
+        as.numeric %>%
+            return
+}
+
+dat <- dat %>%
+    mutate(value = map_dbl(value, .clip_t))
+
+```
+
+### Simple Summaries
+
+Great, so we have a long format - what can we do? Let's again to some simple summaries, calculating the mean and standard deviations for each metric.
+
+```{r}
+
+dat %>%
+    group_by(variable) %>%
+    summarise(avg = mean(value, na.rm = TRUE),
+              sd = sd(value, na.rm = TRUE)) %>%
+    mutate_at(vars(-variable), round, digits = 2)
+
+```
+
+This last step, the `mutate_at`, simply looks at what variables (via `vars`), aka columns, are present, and then applies a function (in this case, `round`, which takes in additional comma separated arguments (I want to round here to two digits). The `vars` helper function is used to provide users with the ability to use bare column names (aka no quotes) when selecting columns to `mutate` (similar to how the `select` function works by default). 
+
+
+### An Initial Exploration with `ggplot2`
+
+So great! We got some simple summaries here. But can't we get something similar by just using the `summary` or `apply` functions? Yes, but this code is much easier to read, and then gives us the ability to do the cool bit: (gg)plotting! While a regular `plot` would work fine with us specifying our own columns, and is good for quick inspections, for more fanciful plots, ggplot is, as they say, bae.
+
+To round out this post, let's do a series of histograms for each metric.
+
+```{r}
+
+dat %>%
+    ## Specify common x-axis
+    ggplot(aes(x = value)) +
+    ## Create new plots for each metric
+    facet_wrap(~ variable, scales = "free") +
+    ## Plot histograms on each individual facet
+    geom_histogram(bins = 30, colour = "white", fill = "black") +
+    ## Plot Aesthetics
+    labs(x = "", y = "Count") +
+    cowplot::theme_cowplot(font_size = 10) +    
+    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+```
+
+Much prettier, and much shorter than any base code. Some interesting questions to think about: 
+
+* There's a fair number of values stacked at the 0-5 range for completions, and similarly 0-50 yard range for yards. Are these different types of QB's (backups? wildcat plays?), and how might we remove them from consideration in estimating a QB's efficacy?
+* Which values are correlated? For example, are yards correlated with completions? Are interceptions correlated with attempts?
+* How might we start to rate QBs?
+
+So the takeaway from this post is to think about we can make data tidy, from wide to long formatting, to make it easier for us to do cool things in the tidyverse such as plotting and statistical transformations. While these were fairly toy-level examples, this tidy format will be much more useful later on. And bonus: this also helps us with doing some data debugging, as we saw here! 
+
+Of course, huge thanks to Hadley Wickham for his writing on the topic, much more eloquent than mine in explaining the concept and its many uses - check out the paper [here](http://vita.had.co.nz/papers/tidy-data.html), which ostensibly has been a driving force in the `tidyverse` philosophy. 
+
+

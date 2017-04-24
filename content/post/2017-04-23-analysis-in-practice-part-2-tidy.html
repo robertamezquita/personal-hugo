@@ -1,0 +1,180 @@
+---
+title: Analysis in Practice Part 2 - Tidy
+author: Robert A. Amezquita
+date: '2017-04-23'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+
+<p>This is the second part of a series of posts working with an NFL quarterback data, following up after doing some initial <a href="http://robertamezquita.github.io/post/2017-04-17-analysis-in-practice-part-1-cleanup/">cleanup</a>. Here, I’ll focus on how I like to format data for optimal tidyness - the tidy (also known as long) format.</p>
+<div id="a-small-example" class="section level3">
+<h3>A Small Example</h3>
+<p>Typically, when we get a dataset, we’ll see it as a series of columns (variables) with values across many rows (each an observation). This format - the wide format - is certainly amenable for human parsing, and also implies a relationship between a single observation across multiple variables.</p>
+<p>What do I mean by this? Let’s take a look at a quick example in code of what we might get in wide format.</p>
+<pre class="r"><code>library(tidyverse)
+
+wide_data &lt;- tribble(
+    ~id, ~height, ~width,
+    &quot;A&quot;,      10,     20,
+    &quot;B&quot;,      5,      11,
+    &quot;C&quot;,      7,      12
+)</code></pre>
+<p>Note here how I’m using the <code>tibble</code> package <code>tribble</code> function to specify the data object (compared to a regular data frame). So you can see we have two variables - height and width - measured for three objects with id’s A, B, and C.</p>
+<p>But what if instead of this wide format, we turn it into a <em>long</em> format? In other words, we can <em>gather</em> the values and make the following..</p>
+<pre class="r"><code>long_data &lt;- wide_data %&gt;%
+    gather(variable, value, -id)
+
+long_data</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##      id variable value
+##   &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;
+## 1     A   height    10
+## 2     B   height     5
+## 3     C   height     7
+## 4     A    width    20
+## 5     B    width    11
+## 6     C    width    12</code></pre>
+<p>While this long format is not as easily readable for humans, it is <em>much</em> more readable for our <code>tidyverse</code> tools, such as <code>ggplot2</code> for visualization, and <code>dplyr</code> for doing things like summaries of different variables. Let’s try the latter, and doing a summary here of height and width across our observations, A through C.</p>
+<pre class="r"><code>summary &lt;- long_data %&gt;%
+    group_by(variable) %&gt;%
+    summarise(average = mean(value)) %&gt;%
+    mutate(average = round(average, digits = 2))
+
+summary</code></pre>
+<pre><code>## # A tibble: 2 × 2
+##   variable average
+##      &lt;chr&gt;   &lt;dbl&gt;
+## 1   height    7.33
+## 2    width   14.33</code></pre>
+<p>Here, the function names say it all: I group based on the measurement being taken, and then do a summary (in this case, an average) for each of those groups - height and width. Then the final mutate step just takes the newly created column, <code>average</code>, and round it down to two digits.</p>
+<p>This is a pretty trivial example, but when you have lots of data this transformation from wide to long is extremely useful. So, to make a long story short: wide data is great for humans, and long data is great for modern R idioms of programming in the tidyverse.</p>
+</div>
+<div id="back-to-our-nfl-qb-data" class="section level3">
+<h3>Back to Our NFL QB Data</h3>
+<p>Let’s go back to our dataset from following the first post, and refresh ourselves on what it looks like:</p>
+<pre class="r"><code>glimpse(raw) ## Invisibly loaded/cleaned data </code></pre>
+<pre><code>## Observations: 12,556
+## Variables: 13
+## $ qb         &lt;chr&gt; &quot;Matt Ryan&quot;, &quot;Jameis Winston&quot;, &quot;Mike Glennon&quot;, &quot;Mat...
+## $ att        &lt;int&gt; 34, 37, 11, 36, 40, 47, 36, 27, 2, 28, 1, 41, 33, 2...
+## $ cmp        &lt;int&gt; 25, 23, 10, 23, 31, 27, 22, 16, 2, 17, 0, 22, 20, 2...
+## $ yds        &lt;dbl&gt; 344, 261, 75, 219, 273, 364, 257, 194, 19, 149, 0, ...
+## $ ypa        &lt;dbl&gt; 10.1, 7.1, 6.8, 6.1, 6.8, 7.7, 7.1, 7.2, 9.5, 5.3, ...
+## $ td         &lt;int&gt; 4, 3, 1, 2, 1, 0, 4, 1, 0, 1, 0, 2, 1, 3, 0, 1, 1, ...
+## $ int        &lt;int&gt; 0, 0, 0, 1, 0, 2, 2, 2, 0, 0, 0, 1, 0, 0, 0, 0, 1, ...
+## $ lg         &lt;chr&gt; &quot;32t&quot;, &quot;28&quot;, &quot;13&quot;, &quot;28t&quot;, &quot;32&quot;, &quot;58&quot;, &quot;46&quot;, &quot;27&quot;, &quot;...
+## $ sack       &lt;dbl&gt; 2, 2, 0, 1, 2, 2, 1, 3, 0, 1, 0, 2, 2, 0, 0, 4, 2, ...
+## $ loss       &lt;dbl&gt; 19, 10, 0, 5, 14, 17, 9, 22, 0, 12, 0, 8, 18, 0, 0,...
+## $ rate       &lt;dbl&gt; 144.7, 110.3, 125.4, 87.6, 103.4, 64.5, 96.6, 62.9,...
+## $ GamePoints &lt;int&gt; 43, 28, 28, 22, 16, 23, 28, 23, 23, 27, 27, 14, 19,...
+## $ year       &lt;int&gt; 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 201...</code></pre>
+</div>
+<div id="a-quick-inspection-and-debugging" class="section level3">
+<h3>A Quick Inspection and Debugging</h3>
+<p>So we can see that we have a bunch of variables for each quarterback in this wide format. Let’s turn it into the long format similar to above.</p>
+<pre class="r"><code>dat &lt;- raw %&gt;%
+    gather(variable, value, -qb)
+dat</code></pre>
+<pre><code>## # A tibble: 150,672 × 3
+##                  qb variable value
+##               &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;
+## 1         Matt Ryan      att    34
+## 2    Jameis Winston      att    37
+## 3      Mike Glennon      att    11
+## 4  Matthew Stafford      att    36
+## 5      Sam Bradford      att    40
+## 6      Carson Wentz      att    47
+## 7       Eli Manning      att    36
+## 8  Ryan Fitzpatrick      att    27
+## 9       Bryce Petty      att     2
+## 10   Ryan Tannehill      att    28
+## # ... with 150,662 more rows</code></pre>
+<p>Odd, we see that the value column is also a character! That’s not good. Let’s look at what’s causing that by trying to convert the value column to numeric, and seeing where it fails:</p>
+<pre class="r"><code>tmp &lt;- dat %&gt;%
+    mutate(value = as.numeric(value))</code></pre>
+<pre><code>## Warning in eval(substitute(expr), envir, enclos): NAs introduced by
+## coercion</code></pre>
+<pre class="r"><code>## Filter on NA values where numeric conversion fails
+## Then take unique values and print first 5
+dat %&gt;%
+    filter(tmp$value %&gt;% is.na) %&gt;%
+    select(value) %&gt;% unique %&gt;%
+    print(n = 5)</code></pre>
+<pre><code>## # A tibble: 98 × 1
+##   value
+##   &lt;chr&gt;
+## 1  &lt;NA&gt;
+## 2   32t
+## 3   28t
+## 4   95t
+## 5   65t
+## # ... with 93 more rows</code></pre>
+<p>Hmm, so seems we have trailing ‘t’ letters in some of the values (associated with the longest throw metric). We can clip these trailing t’s using the <code>stringr</code> library and then do the conversion again.</p>
+<pre class="r"><code>.clip_t &lt;- function(x) {
+    stringr::str_replace(x, &quot;t&quot;, &quot;&quot;) %&gt;%
+        as.numeric %&gt;%
+            return
+}
+
+dat &lt;- dat %&gt;%
+    mutate(value = map_dbl(value, .clip_t))</code></pre>
+</div>
+<div id="simple-summaries" class="section level3">
+<h3>Simple Summaries</h3>
+<p>Great, so we have a long format - what can we do? Let’s again to some simple summaries, calculating the mean and standard deviations for each metric.</p>
+<pre class="r"><code>dat %&gt;%
+    group_by(variable) %&gt;%
+    summarise(avg = mean(value, na.rm = TRUE),
+              sd = sd(value, na.rm = TRUE)) %&gt;%
+    mutate_at(vars(-variable), round, digits = 2)</code></pre>
+<pre><code>## # A tibble: 12 × 3
+##      variable     avg     sd
+##         &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1         att   26.87  13.62
+## 2         cmp   16.12   8.81
+## 3  GamePoints   21.42  10.67
+## 4         int    0.80   0.97
+## 5          lg   33.36  18.32
+## 6        loss   11.97  11.96
+## 7        rate   80.22  32.07
+## 8        sack    1.86   1.70
+## 9          td    1.12   1.12
+## 10        yds  186.23 105.90
+## 11       year 2005.94   6.12
+## 12        ypa    6.88   4.20</code></pre>
+<p>This last step, the <code>mutate_at</code>, simply looks at what variables (via <code>vars</code>), aka columns, are present, and then applies a function (in this case, <code>round</code>, which takes in additional comma separated arguments (I want to round here to two digits). The <code>vars</code> helper function is used to provide users with the ability to use bare column names (aka no quotes) when selecting columns to <code>mutate</code> (similar to how the <code>select</code> function works by default).</p>
+</div>
+<div id="an-initial-exploration-with-ggplot2" class="section level3">
+<h3>An Initial Exploration with <code>ggplot2</code></h3>
+<p>So great! We got some simple summaries here. But can’t we get something similar by just using the <code>summary</code> or <code>apply</code> functions? Yes, but this code is much easier to read, and then gives us the ability to do the cool bit: (gg)plotting! While a regular <code>plot</code> would work fine with us specifying our own columns, and is good for quick inspections, for more fanciful plots, ggplot is, as they say, bae.</p>
+<p>To round out this post, let’s do a series of histograms for each metric.</p>
+<pre class="r"><code>dat %&gt;%
+    ## Specify common x-axis
+    ggplot(aes(x = value)) +
+    ## Create new plots for each metric
+    facet_wrap(~ variable, scales = &quot;free&quot;) +
+    ## Plot histograms on each individual facet
+    geom_histogram(bins = 30, colour = &quot;white&quot;, fill = &quot;black&quot;) +
+    ## Plot Aesthetics
+    labs(x = &quot;&quot;, y = &quot;Count&quot;) +
+    cowplot::theme_cowplot(font_size = 10) +    
+    theme(axis.text.x = element_text(angle = 30, hjust = 1))</code></pre>
+<pre><code>## Warning: Removed 85 rows containing non-finite values (stat_bin).</code></pre>
+<p><img src="/post/2017-04-23-analysis-in-practice-part-2-tidy_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Much prettier, and much shorter than any base code. Some interesting questions to think about:</p>
+<ul>
+<li>There’s a fair number of values stacked at the 0-5 range for completions, and similarly 0-50 yard range for yards. Are these different types of QB’s (backups? wildcat plays?), and how might we remove them from consideration in estimating a QB’s efficacy?</li>
+<li>Which values are correlated? For example, are yards correlated with completions? Are interceptions correlated with attempts?</li>
+<li>How might we start to rate QBs?</li>
+</ul>
+<p>So the takeaway from this post is to think about we can make data tidy, from wide to long formatting, to make it easier for us to do cool things in the tidyverse such as plotting and statistical transformations. While these were fairly toy-level examples, this tidy format will be much more useful later on. And bonus: this also helps us with doing some data debugging, as we saw here!</p>
+<p>Of course, huge thanks to Hadley Wickham for his writing on the topic, much more eloquent than mine in explaining the concept and its many uses - check out the paper <a href="http://vita.had.co.nz/papers/tidy-data.html">here</a>, which ostensibly has been a driving force in the <code>tidyverse</code> philosophy.</p>
+</div>
