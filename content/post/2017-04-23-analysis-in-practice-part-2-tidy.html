@@ -14,6 +14,7 @@ type: 'post'
 ---
 
 
+
 <p>This is the second part of a series of posts working with an NFL quarterback data, following up after doing some initial <a href="http://robertamezquita.github.io/post/2017-04-17-analysis-in-practice-part-1-cleanup/">cleanup</a>. Here, I’ll focus on how I like to format data for optimal tidyness - the tidy (also known as long) format.</p>
 <div id="a-small-example" class="section level3">
 <h3>A Small Example</h3>
@@ -100,8 +101,8 @@ dat</code></pre>
 <p>Odd, we see that the value column is also a character! That’s not good. Let’s look at what’s causing that by trying to convert the value column to numeric, and seeing where it fails:</p>
 <pre class="r"><code>tmp &lt;- dat %&gt;%
     mutate(value = as.numeric(value))</code></pre>
-<pre><code>## Warning in eval(substitute(expr), envir, enclos): NAs introduced by
-## coercion</code></pre>
+<pre><code>## Warning in evalq(as.numeric(c(&quot;34&quot;, &quot;37&quot;, &quot;11&quot;, &quot;36&quot;, &quot;40&quot;, &quot;47&quot;, &quot;36&quot;, :
+## NAs introduced by coercion</code></pre>
 <pre class="r"><code>## Filter on NA values where numeric conversion fails
 ## Then take unique values and print first 5
 dat %&gt;%

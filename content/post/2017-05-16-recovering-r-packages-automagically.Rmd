@@ -1,0 +1,91 @@
+---
+title: Recovering R Packages Automagically
+author: Robert A. Amezquita
+date: '2017-05-16'
+slug: ''
+categories: []
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+In the process of working on a new R package, one of the TODO's on my list was testing it on a new version of R. However, upgrading R is a somewhat dreaded process, as this involves (re)installing all your old packages. While solutions like [packrat](https://rstudio.github.io/packrat/) deal with R package dependencies, this doesn't seem to work for R upgrades. Another solution involves simply copying the R package library into the new R version's package library, but this introduces the issue of potential breakage.
+
+<!--more-->
+
+After some searching, I found multiple solutions that involve [transferring](https://hlplab.wordpress.com/2012/06/01/transferring-installed-packages-between-different-installations-of-r/) [installed](http://stackoverflow.com/questions/7133394/migrating-r-libraries) [packages](http://www.schulte-mecklenbeck.com/2011/04/resinstalling-packages-in-r-after-update/), all doing the same basic process:
+
+* check what packages you have currently; save the list
+* upgrade R
+* reinstall packages, and compare to find what's missing
+
+Unfortunately, all the code that does this task is messier than I'd like, so I took some time (read: procrastinated) to put together a neat little R script that writes your package list file for you, recovers it, and then installs your missing packages automagically. 
+
+
+```{r, eval = FALSE}
+
+## How to recover R packages version to version
+##
+## This script eases the transition pains of upgrading R
+## by saving `.rda` files that list out your installed packages
+## to compare across different versions of R, and install
+## missing packages programmatically.
+##
+## This works with CRAN packages and Bioconductor packages,
+## but unfortunately manual installation is required of Github
+## packages. 
+## ---------------------------------------------------------------
+## 0. Functions of note
+
+.current_pkgs <- function() {
+    tmp <- installed.packages()
+    current_pkgs <- as.vector(tmp[is.na(tmp[, "Priority"]), 1])
+    return(current_pkgs)
+}
+
+.compare_pkgs <- function(previous_pkgs) {
+    missing_pkgs <- setdiff(previous_pkgs, .current_pkgs())
+    return(missing_pkgs)
+}
+
+## ----------------------------------------------------------------
+## 1. Save current R version's set of packages
+path <- paste0("pkgs_", gsub(" ", "_", R.Version()$version.string))
+path <- gsub("\\(|\\)", "", path)
+path <- gsub("-", "", path)
+
+## Write package list for current R version as rda  
+assign(path, .current_pkgs())
+save(list = path, file = paste0(path, ".rda"))
+
+## ----------------------------------------------------------------
+## 2. Upgrade R
+
+## ----------------------------------------------------------------
+## 3. Reinstall packages
+
+## Load in list of previous R version's packages
+l <- list.files(pattern = "pkgs")
+path <- l[length(l)] # grab the latest version's
+load(file = path)
+previous_pkgs <- eval(as.name(gsub(".rda", "", path)))
+
+## Calculate and install missing packages
+missing_pkgs <- .compare_pkgs(previous_pkgs)
+install.packages(missing_pkgs)
+update.packages()
+
+## Bioconductor packages reinstall - post CRAN
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+
+missing_pkgs <- .compare_pkgs(previous_pkgs)
+for (i in 1:length(missing)) { biocLite(missing_pkgs[i]) }
+
+## Check `warnings()` to see any failures in installation
+
+```

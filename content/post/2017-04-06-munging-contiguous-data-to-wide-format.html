@@ -13,11 +13,8 @@ linktitle: ''
 type: 'post'
 ---
 
-<!-- BLOGDOWN-HEAD -->
-<!-- /BLOGDOWN-HEAD -->
 
-<!-- BLOGDOWN-BODY-BEFORE -->
-<!-- /BLOGDOWN-BODY-BEFORE -->
+
 <p>Here I just wanted to take a quick second to share a small code snippet that illustrates munging a contiguous dataset to a wide format.</p>
 <p>What do I mean by that? Consider the following example: let’s say we have a dataset where we have patients A, B, and C, and we take two tissues from each patient - one of Serum and one of TIF (tumor interstitial fluid), and from each tissue assay a whole host of metabolites, each with its own column. If we want to take the log2 fold-change of Serum vs. TIF for each patient, its tricky to do in Excel when the data is spread out contiguously, across rows.</p>
 <p>So how can we tackle this sort of problem in R? Making use of the <code>tidyverse</code>, the key here is to first gather the metabolites, such that we have a new column named <code>metabolite</code> describing what is being assayed, and a <code>value</code> column with the readout.</p>
@@ -78,9 +75,9 @@ calc_dat</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   Patient.ID metabolite Serum   TIF lfc_Serum_TIF
 ##        &lt;chr&gt;      &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
-## 1        CR1    Glucose     1     4    -1.9892469
-## 2        CR1  Glutamate     3    10    -1.7336066
-## 3        CR1   Pyruvate     2     3    -0.5825680
-## 4        CR2    Glucose    11     5     1.1359320
-## 5        CR2  Glutamate     5     4     0.3212084
-## 6        CR2   Pyruvate     2    10    -2.3161746</code></pre>
+## 1        CR1    Glucose     1     4        -1.989
+## 2        CR1  Glutamate     3    10        -1.734
+## 3        CR1   Pyruvate     2     3        -0.583
+## 4        CR2    Glucose    11     5         1.136
+## 5        CR2  Glutamate     5     4         0.321
+## 6        CR2   Pyruvate     2    10        -2.316</code></pre>
