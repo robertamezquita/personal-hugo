@@ -3,7 +3,8 @@ title: Analysis in Practice Part 1 - Cleanup
 author: Robert A. Amezquita
 date: '2017-04-17'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''
@@ -75,7 +76,7 @@ glimpse(raw, width = 43)</code></pre>
 raw %&gt;%
     mutate(qb = map_chr(qb, .parse_qb)) %&gt;% ## See note below
     select(qb) %&gt;% head(3)</code></pre>
-<pre><code>## # A tibble: 3 × 1
+<pre><code>## # A tibble: 3 x 1
 ##                qb
 ##             &lt;chr&gt;
 ## 1      Ryan, Matt

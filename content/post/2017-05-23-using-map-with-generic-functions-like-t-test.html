@@ -1,0 +1,142 @@
+---
+title: Using `map` with Generic Functions Like `t-test`
+author: Robert A. Amezquita
+date: '2017-05-23'
+slug: ''
+categories:
+  - rstats
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+
+
+<p>Tibbles are beautiful constructs that allow for a new column type, list columns, to exist, capturing bundles of (untidy) data into the structure of a data frame. They are especially great for when you want to do cool things like apply a function to multiple datasets (kept in the aforementioned list column), and generate a new column of (say, tidier) data.</p>
+<p>One application might be if you want to do a quick t-test for various datasets, possibly even varying the contrasts at each iteration. This came up in a code question during lab, and as I explored this problem, the limitations of the <code>stats::t.test</code> and friends functions, and even tibbles, started to become very intriguing.</p>
+<div id="example-of-list-columns" class="section level2">
+<h2>Example of List Columns</h2>
+<p>As I said before, list columns in the new <code>tbl_df</code> class of object are really great for keeping unstructured data encapsulated in a structured format. For example:</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>## Example Data
+data &lt;- list(ex1 = tibble(group = c(rep(&quot;A&quot;, 100), rep(&quot;B&quot;, 100)),
+                          obs = rnorm(200)),
+             ex2 = tibble(group = c(rep(&quot;A&quot;, 50), rep(&quot;B&quot;, 50)),
+                          obs = rnorm(100)),
+             ex3 = tibble(group = c(rep(&quot;A&quot;, 25), rep(&quot;B&quot;, 25)),
+                          obs = rnorm(50),
+                          some_var = rep(&quot;blah&quot;, 50))) %&gt;%
+    enframe(value = &quot;data&quot;)
+
+data</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##    name               data
+##   &lt;chr&gt;             &lt;list&gt;
+## 1   ex1 &lt;tibble [200 x 2]&gt;
+## 2   ex2 &lt;tibble [100 x 2]&gt;
+## 3   ex3  &lt;tibble [50 x 3]&gt;</code></pre>
+<p>What’s really great is that as you can see, the contents of the <code>data</code> column can vary, with different numbers of rows or columns, and this list column could individual lists, as we’ll see in a bit, or even S3/S4 class objects.</p>
+</div>
+<div id="order-matters-when-we-use-a-generic-function-like-t.test" class="section level2">
+<h2>Order matters when we use a generic function like <code>t.test</code></h2>
+<p>So let’s say we want to compare group A vs group B in each of our datasets. If we want to do a single comparison, given how we have the data structured (with a column, <code>group</code>, and the observations in <code>obs</code>), we could run <code>t.test</code> using the <code>t.test(formula, data)</code> specification.</p>
+<pre class="r"><code>test &lt;- t.test(formula = formula(&quot;obs ~ group&quot;), data = data$data[[1]]) # works
+test</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  obs by group
+## t = 2, df = 200, p-value = 0.04
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.00813 0.53963
+## sample estimates:
+## mean in group A mean in group B 
+##          0.0856         -0.1882</code></pre>
+<p>Now, the key thing to note is that <code>t.test</code> is what’s known as a <em>generic function</em>, a class of function which is used for object-oriented style programming. What This means in practical terms is that we have two different methods (versions) of <code>t.test</code> - the one we just used, <code>stats:::t.test.formula</code>, and <code>stats:::t.test.default</code>. How does R determine which one to use? It depends on the <em>first</em> argument’s class, which is passed to the R function <code>UseMethod</code>, which checks if the <em>first</em> argument is a vector, thus calling <code>stats:::t.test.default</code>, or if it is a formula, in which case it uses <code>stats:::t.test.formula</code>.</p>
+<p>And that’s why, below, we see that order matters!</p>
+<pre class="r"><code>## Issue 1: Formula must be first if using that parametrization
+t.test(data = data$data[[1]], formula = formula(&quot;obs ~ group&quot;)) # barfs</code></pre>
+<pre><code>## Error in t.test.default(data = data$data[[1]], formula = formula(&quot;obs ~ group&quot;)): argument &quot;x&quot; is missing, with no default</code></pre>
+<p>So, if we wanted to use this in our tidy format, and employ <code>mutate</code> and <code>map</code> to run <code>t.test</code> across each of our datasets kept in the list column form, it wouldn’t work, even though we supply named arguments to <code>map</code>, as we did above!</p>
+<pre class="r"><code>## This version barfs, due to formulas the wrong method being used
+## (also can&#39;t have a single value in pmap/map)
+data %&gt;%
+    mutate(t_test = map(list(data = data), t.test,
+                         formula = formula(&quot;obs ~ group&quot;)))</code></pre>
+<pre><code>## Warning in mean.default(x): argument is not numeric or logical: returning
+## NA</code></pre>
+<pre><code>## Error in mutate_impl(.data, dots): is.atomic(x) is not TRUE</code></pre>
+<p>How can we get around this?</p>
+</div>
+<div id="solution-1-use-a-custom-function" class="section level2">
+<h2>Solution 1: Use a custom function</h2>
+<p>In some cases, one easy workaround is simply to make a custom function that interprets arguments and passes them into another function, essentially acting as a wrapper. This was the first solution I thought of to bypass the issue above:</p>
+<pre class="r"><code>## A custom function works to make formula as a variable
+.t_test &lt;- function(formula, data, ...) {
+    t.test(formula(formula), data = data, ...)
+}
+
+data %&gt;%
+    mutate(formula = &quot;obs ~ group&quot;,
+           t_test = map2(formula, data, .t_test)) </code></pre>
+<pre><code>## # A tibble: 3 x 4
+##    name               data     formula      t_test
+##   &lt;chr&gt;             &lt;list&gt;       &lt;chr&gt;      &lt;list&gt;
+## 1   ex1 &lt;tibble [200 x 2]&gt; obs ~ group &lt;S3: htest&gt;
+## 2   ex2 &lt;tibble [100 x 2]&gt; obs ~ group &lt;S3: htest&gt;
+## 3   ex3  &lt;tibble [50 x 3]&gt; obs ~ group &lt;S3: htest&gt;</code></pre>
+<pre class="r"><code>data</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##    name               data
+##   &lt;chr&gt;             &lt;list&gt;
+## 1   ex1 &lt;tibble [200 x 2]&gt;
+## 2   ex2 &lt;tibble [100 x 2]&gt;
+## 3   ex3  &lt;tibble [50 x 3]&gt;</code></pre>
+<p>And voila, we can even encode our formula as its own column, <code>formula</code>, and can thus vary this dynamically if we wanted to for each individual dataset.</p>
+<p>But, that’s somewhat more code…so, how can we get this code to work?</p>
+</div>
+<div id="solution-2-call-the-t.test.formula-method-directly" class="section level2">
+<h2>Solution 2: Call the <code>t.test.formula</code> method directly</h2>
+<p>In looking to explain the <code>t.test</code> function, if we just go and look at the <a href="https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/t.test.R">t.test source code</a>, we see that the source is structured as:</p>
+<pre class="r"><code>t.test &lt;- function(x, ...) UseMethod(&quot;t.test&quot;)
+
+t.test.default &lt;- function(...) {
+    ## code for t.test.default, using x/y vector args
+}
+t.test.formula &lt;- function(...) {
+    ## code for t.test.formula, using formula/data args
+}</code></pre>
+<p>The first line is encoding the <em>generic function</em> for <code>t.test</code>, and the <code>UseMethod</code> call tests for the class of the first arg, vector (default) vs. formula (formula), using the corresponding method/version of the function.</p>
+<p>So we saw that the order of the arguments matters above, but we can bypass this check by simply calling the correct method directly! To do that, we need to access the methods functions directly. Usually, they are hidden from the user (e.g., not exported by the <code>stats</code> package), but we can access these hidden functions by using the triple-colon <code>:::</code> to get inside the <code>stats</code> package namespace.</p>
+<p>By using <code>stats:::t.test.formula</code>, we bypass the argument checker, and can provide arguments in whatever order we want, and thus do the correct <code>t.test</code> method and apply our <code>map</code> call correctly!</p>
+<pre class="r"><code>## Both version works
+data %&gt;%
+    mutate(t_test = map(data, stats:::t.test.formula,
+                        formula = formula(&quot;obs ~ group&quot;)))</code></pre>
+<pre class="r"><code>data %&gt;%
+    mutate(t_test = pmap(list(data = data), stats:::t.test.formula,
+                        formula = formula(&quot;obs ~ group&quot;)))</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##    name               data      t_test
+##   &lt;chr&gt;             &lt;list&gt;      &lt;list&gt;
+## 1   ex1 &lt;tibble [200 x 2]&gt; &lt;S3: htest&gt;
+## 2   ex2 &lt;tibble [100 x 2]&gt; &lt;S3: htest&gt;
+## 3   ex3  &lt;tibble [50 x 3]&gt; &lt;S3: htest&gt;</code></pre>
+<p>Boom! We have a new list column with the S3 of class <code>htest</code>, the summary return by a working <code>t.test</code> call.</p>
+<p>This was a little bit of a trickster to solve, but was an interesting example for me of how generic functions operate. S3 methods are not as popular anymore compared to their newer, shinier S4 cousins, but gives us some insight into the object-oriented (OO) system that lays dormant in R, particularly in <code>stats</code> and related packages.</p>
+<p>For more about generic functions and object-oriented programming in R, check out the Advanced R chapter on <a href="http://adv-r.had.co.nz/Functions.html">functions</a>, <a href="http://adv-r.had.co.nz/S3.html">S3</a>, and <a href="http://adv-r.had.co.nz/OO-essentials.html">OO</a>.</p>
+</div>

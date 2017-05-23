@@ -3,7 +3,8 @@ title: One Year with Rover
 author: Robert A. Amezquita
 date: '2017-04-08'
 slug: ''
-categories: []
+categories:
+  - random
 tags: []
 description: ''
 featured: 'philly-header.JPG'

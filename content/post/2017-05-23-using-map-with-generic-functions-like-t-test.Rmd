@@ -1,0 +1,148 @@
+---
+title: Using `map` with Generic Functions Like `t-test`
+author: Robert A. Amezquita
+date: '2017-05-23'
+slug: ''
+categories:
+  - rstats
+tags: []
+description: ''
+featured: ''
+featuredalt: ''
+featuredpath: ''
+linktitle: ''
+type: 'post'
+---
+
+Tibbles are beautiful constructs that allow for a new column type, list columns, to exist, capturing bundles of (untidy) data into the structure of a data frame. They are especially great for when you want to do cool things like apply a function to multiple datasets (kept in the aforementioned list column), and generate a new column of (say, tidier) data.
+
+One application might be if you want to do a quick t-test for various datasets, possibly even varying the contrasts at each iteration. This came up in a code question during lab, and as I explored this problem, the limitations of the `stats::t.test` and friends functions, and even tibbles, started to become very intriguing.
+
+## Example of List Columns
+
+As I said before, list columns in the new `tbl_df` class of object are really great for keeping unstructured data encapsulated in a structured format. For example:
+
+
+```{r}
+
+library(tidyverse)
+
+## Example Data
+data <- list(ex1 = tibble(group = c(rep("A", 100), rep("B", 100)),
+                          obs = rnorm(200)),
+             ex2 = tibble(group = c(rep("A", 50), rep("B", 50)),
+                          obs = rnorm(100)),
+             ex3 = tibble(group = c(rep("A", 25), rep("B", 25)),
+                          obs = rnorm(50),
+                          some_var = rep("blah", 50))) %>%
+    enframe(value = "data")
+
+data
+
+```
+
+What's really great is that as you can see, the contents of the `data` column can vary, with different numbers of rows or columns, and this list column could individual lists, as we'll see in a bit, or even S3/S4 class objects.
+
+## Order matters when we use a generic function like `t.test`
+
+So let's say we want to compare group A vs group B in each of our datasets. If we want to do a single comparison, given how we have the data structured (with a column, `group`, and the observations in `obs`), we could run `t.test` using the `t.test(formula, data)` specification. 
+
+
+```{r}
+
+test <- t.test(formula = formula("obs ~ group"), data = data$data[[1]]) # works
+test
+
+```
+
+Now, the key thing to note is that `t.test` is what's known as a *generic function*, a class of function which is used for object-oriented style programming. What This means in practical terms is that we have two different methods (versions) of `t.test` - the one we just used, `stats:::t.test.formula`, and `stats:::t.test.default`. How does R determine which one to use? It depends on the *first* argument's class, which is passed to the R function `UseMethod`, which checks if the *first* argument is a vector, thus calling `stats:::t.test.default`, or if it is a formula, in which case it uses `stats:::t.test.formula`.
+
+And that's why, below, we see that order matters!
+
+```{r, error = TRUE}
+## Issue 1: Formula must be first if using that parametrization
+t.test(data = data$data[[1]], formula = formula("obs ~ group")) # barfs
+
+```
+
+So, if we wanted to use this in our tidy format, and employ `mutate` and `map` to run `t.test` across each of our datasets kept in the list column form, it wouldn't work, even though we supply named arguments to `map`, as we did above!
+
+```{r, error = TRUE}
+## This version barfs, due to formulas the wrong method being used
+## (also can't have a single value in pmap/map)
+data %>%
+    mutate(t_test = map(list(data = data), t.test,
+                         formula = formula("obs ~ group")))
+
+```
+
+How can we get around this?
+
+
+## Solution 1: Use a custom function
+
+In some cases, one easy workaround is simply to make a custom function that interprets arguments and passes them into another function, essentially acting as a wrapper. This was the first solution I thought of to bypass the issue above:
+
+```{r}
+
+## A custom function works to make formula as a variable
+.t_test <- function(formula, data, ...) {
+    t.test(formula(formula), data = data, ...)
+}
+
+data %>%
+    mutate(formula = "obs ~ group",
+           t_test = map2(formula, data, .t_test)) 
+data
+
+```
+
+And voila, we can even encode our formula as its own column, `formula`, and can thus vary this dynamically if we wanted to for each individual dataset.
+
+But, that's somewhat more code...so, how can we get this code to work?
+
+
+## Solution 2: Call the `t.test.formula` method directly
+
+In looking to explain the `t.test` function, if we just go and look at the [t.test source code](https://github.com/SurajGupta/r-source/blob/master/src/library/stats/R/t.test.R), we see that the source is structured as:
+
+```{r, eval = FALSE}
+
+t.test <- function(x, ...) UseMethod("t.test")
+
+t.test.default <- function(...) {
+    ## code for t.test.default, using x/y vector args
+}
+t.test.formula <- function(...) {
+    ## code for t.test.formula, using formula/data args
+}
+
+```
+    
+The first line is encoding the *generic function* for `t.test`, and the `UseMethod` call tests for the class of the first arg, vector (default) vs. formula (formula), using the corresponding method/version of the function.
+
+So we saw that the order of the arguments matters above, but we can bypass this check by simply calling the correct method directly! To do that, we need to access the methods functions directly. Usually, they are hidden from the user (e.g., not exported by the `stats` package), but we can access these hidden functions by using the triple-colon `:::` to get inside the `stats` package namespace. 
+
+By using `stats:::t.test.formula`, we bypass the argument checker, and can provide arguments in whatever order we want, and thus do the correct `t.test` method and apply our `map` call correctly!
+
+
+```{r, eval = FALSE}
+## Both version works
+data %>%
+    mutate(t_test = map(data, stats:::t.test.formula,
+                        formula = formula("obs ~ group")))
+```
+
+```{r}
+data %>%
+    mutate(t_test = pmap(list(data = data), stats:::t.test.formula,
+                        formula = formula("obs ~ group")))
+```
+
+Boom! We have a new list column with the S3 of class `htest`, the summary return by a working `t.test` call. 
+
+This was a little bit of a trickster to solve, but was an interesting example for me of how generic functions operate. S3 methods are not as popular anymore compared to their newer, shinier S4 cousins, but gives us some insight into the object-oriented (OO) system that lays dormant in R, particularly in `stats` and related packages. 
+
+For more about generic functions and object-oriented programming in R, check out the Advanced R chapter on [functions](http://adv-r.had.co.nz/Functions.html), [S3](http://adv-r.had.co.nz/S3.html), and [OO](http://adv-r.had.co.nz/OO-essentials.html). 
+
+

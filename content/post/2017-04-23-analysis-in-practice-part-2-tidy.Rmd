@@ -3,7 +3,8 @@ title: Analysis in Practice Part 2 - Tidy
 author: Robert A. Amezquita
 date: '2017-04-23'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''

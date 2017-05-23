@@ -3,7 +3,8 @@ title: Munging Contiguous Data to Wide Format
 author: Robert A. Amezquita
 date: '2017-04-06'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''

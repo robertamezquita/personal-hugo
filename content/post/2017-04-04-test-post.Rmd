@@ -3,7 +3,8 @@ title: Test Post
 author: Robert A. Amezquita
 date: '2017-04-04'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''

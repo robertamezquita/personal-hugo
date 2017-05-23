@@ -3,7 +3,8 @@ title: Recovering R Packages Automagically
 author: Robert A. Amezquita
 date: '2017-05-16'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''

@@ -3,7 +3,8 @@ title: Munging Contiguous Data to Wide Format
 author: Robert A. Amezquita
 date: '2017-04-06'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''
@@ -30,7 +31,7 @@ dat &lt;- tribble(
     &#39;CR2&#39;,         &#39;TIF&#39;,        5,         10,         4
 )
 dat</code></pre>
-<pre><code>## # A tibble: 4 × 5
+<pre><code>## # A tibble: 4 x 5
 ##   Patient.ID Tissue Glucose Pyruvate Glutamate
 ##        &lt;chr&gt;  &lt;chr&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
 ## 1        CR1  Serum       1        2         3
@@ -52,7 +53,7 @@ tidy_dat &lt;- dat %&gt;%
                   -Patient.ID, -Tissue) %&gt;%
     spread(Tissue, value)
 tidy_dat</code></pre>
-<pre><code>## # A tibble: 6 × 4
+<pre><code>## # A tibble: 6 x 4
 ##   Patient.ID metabolite Serum   TIF
 ## *      &lt;chr&gt;      &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1        CR1    Glucose     1     4
@@ -72,7 +73,7 @@ calc_dat &lt;- tidy_dat %&gt;%
                lfc_Serum_TIF = log2((Serum + pc) / (TIF + pc))
            )
 calc_dat</code></pre>
-<pre><code>## # A tibble: 6 × 5
+<pre><code>## # A tibble: 6 x 5
 ##   Patient.ID metabolite Serum   TIF lfc_Serum_TIF
 ##        &lt;chr&gt;      &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
 ## 1        CR1    Glucose     1     4        -1.989

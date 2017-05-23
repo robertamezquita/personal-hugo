@@ -3,7 +3,8 @@ title: Analysis in Practice Part 2 - Tidy
 author: Robert A. Amezquita
 date: '2017-04-23'
 slug: ''
-categories: []
+categories:
+  - rstats
 tags: []
 description: ''
 featured: ''
@@ -34,7 +35,7 @@ wide_data &lt;- tribble(
     gather(variable, value, -id)
 
 long_data</code></pre>
-<pre><code>## # A tibble: 6 × 3
+<pre><code>## # A tibble: 6 x 3
 ##      id variable value
 ##   &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;
 ## 1     A   height    10
@@ -50,7 +51,7 @@ long_data</code></pre>
     mutate(average = round(average, digits = 2))
 
 summary</code></pre>
-<pre><code>## # A tibble: 2 × 2
+<pre><code>## # A tibble: 2 x 2
 ##   variable average
 ##      &lt;chr&gt;   &lt;dbl&gt;
 ## 1   height    7.33
@@ -84,18 +85,18 @@ summary</code></pre>
 <pre class="r"><code>dat &lt;- raw %&gt;%
     gather(variable, value, -qb)
 dat</code></pre>
-<pre><code>## # A tibble: 150,672 × 3
+<pre><code>## # A tibble: 150,672 x 3
 ##                  qb variable value
 ##               &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;
-## 1         Matt Ryan      att    34
-## 2    Jameis Winston      att    37
-## 3      Mike Glennon      att    11
-## 4  Matthew Stafford      att    36
-## 5      Sam Bradford      att    40
-## 6      Carson Wentz      att    47
-## 7       Eli Manning      att    36
-## 8  Ryan Fitzpatrick      att    27
-## 9       Bryce Petty      att     2
+##  1        Matt Ryan      att    34
+##  2   Jameis Winston      att    37
+##  3     Mike Glennon      att    11
+##  4 Matthew Stafford      att    36
+##  5     Sam Bradford      att    40
+##  6     Carson Wentz      att    47
+##  7      Eli Manning      att    36
+##  8 Ryan Fitzpatrick      att    27
+##  9      Bryce Petty      att     2
 ## 10   Ryan Tannehill      att    28
 ## # ... with 150,662 more rows</code></pre>
 <p>Odd, we see that the value column is also a character! That’s not good. Let’s look at what’s causing that by trying to convert the value column to numeric, and seeing where it fails:</p>
@@ -109,7 +110,7 @@ dat %&gt;%
     filter(tmp$value %&gt;% is.na) %&gt;%
     select(value) %&gt;% unique %&gt;%
     print(n = 5)</code></pre>
-<pre><code>## # A tibble: 98 × 1
+<pre><code>## # A tibble: 98 x 1
 ##   value
 ##   &lt;chr&gt;
 ## 1  &lt;NA&gt;
@@ -136,18 +137,18 @@ dat &lt;- dat %&gt;%
     summarise(avg = mean(value, na.rm = TRUE),
               sd = sd(value, na.rm = TRUE)) %&gt;%
     mutate_at(vars(-variable), round, digits = 2)</code></pre>
-<pre><code>## # A tibble: 12 × 3
+<pre><code>## # A tibble: 12 x 3
 ##      variable     avg     sd
 ##         &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt;
-## 1         att   26.87  13.62
-## 2         cmp   16.12   8.81
-## 3  GamePoints   21.42  10.67
-## 4         int    0.80   0.97
-## 5          lg   33.36  18.32
-## 6        loss   11.97  11.96
-## 7        rate   80.22  32.07
-## 8        sack    1.86   1.70
-## 9          td    1.12   1.12
+##  1        att   26.87  13.62
+##  2        cmp   16.12   8.81
+##  3 GamePoints   21.42  10.67
+##  4        int    0.80   0.97
+##  5         lg   33.36  18.32
+##  6       loss   11.97  11.96
+##  7       rate   80.22  32.07
+##  8       sack    1.86   1.70
+##  9         td    1.12   1.12
 ## 10        yds  186.23 105.90
 ## 11       year 2005.94   6.12
 ## 12        ypa    6.88   4.20</code></pre>

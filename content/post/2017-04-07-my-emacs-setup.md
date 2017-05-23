@@ -3,7 +3,8 @@ title: My `emacs` Setup
 author: Robert A. Amezquita
 date: '2017-04-07'
 slug: ''
-categories: []
+categories:
+  - emacs
 tags: []
 description: ''
 featured: ''
